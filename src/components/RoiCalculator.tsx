@@ -174,6 +174,7 @@ export function RoiCalculator({ effectiveDollar, simulations, onAdd, onDelete }:
                       <TableCell className="font-mono">R$ {sim.revenue_per_result.toFixed(2)}</TableCell>
                       <TableCell className="font-mono">R$ {sim.cpa.toFixed(2)}</TableCell>
                       <TableCell className="font-mono">R$ {sim.cpa_ideal.toFixed(2)}</TableCell>
+                      <TableCell className="font-mono">R$ {sim.revenue_per_result.toFixed(2)}</TableCell>
                       <TableCell className="font-mono font-bold">{sim.roi.toFixed(2)}%</TableCell>
                       <TableCell>{statusIcon(sim.status)} {statusLabel(sim.status)}</TableCell>
                       <TableCell>
