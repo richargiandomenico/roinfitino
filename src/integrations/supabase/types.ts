@@ -14,7 +14,187 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      funnel_records: {
+        Row: {
+          conv_p1_p2: number | null
+          conv_p1_p3: number | null
+          conv_p2_p3: number | null
+          created_at: string
+          drop_p1_p2: number | null
+          drop_p1_p3: number | null
+          id: string
+          observation: string | null
+          p2: number
+          p3: number
+          project_id: string | null
+          user_id: string
+          visits_p1: number
+        }
+        Insert: {
+          conv_p1_p2?: number | null
+          conv_p1_p3?: number | null
+          conv_p2_p3?: number | null
+          created_at?: string
+          drop_p1_p2?: number | null
+          drop_p1_p3?: number | null
+          id?: string
+          observation?: string | null
+          p2: number
+          p3: number
+          project_id?: string | null
+          user_id: string
+          visits_p1: number
+        }
+        Update: {
+          conv_p1_p2?: number | null
+          conv_p1_p3?: number | null
+          conv_p2_p3?: number | null
+          created_at?: string
+          drop_p1_p2?: number | null
+          drop_p1_p3?: number | null
+          id?: string
+          observation?: string | null
+          p2?: number
+          p3?: number
+          project_id?: string | null
+          user_id?: string
+          visits_p1?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "funnel_records_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projects: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          niche: string | null
+          updated_at: string
+          url: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          niche?: string | null
+          updated_at?: string
+          url?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          niche?: string | null
+          updated_at?: string
+          url?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      settings: {
+        Row: {
+          adx_fee: number | null
+          created_at: string
+          dollar_rate: number | null
+          id: string
+          meta_fee: number | null
+          tax_rate: number | null
+          updated_at: string
+          use_auto_dollar: boolean | null
+          user_id: string
+        }
+        Insert: {
+          adx_fee?: number | null
+          created_at?: string
+          dollar_rate?: number | null
+          id?: string
+          meta_fee?: number | null
+          tax_rate?: number | null
+          updated_at?: string
+          use_auto_dollar?: boolean | null
+          user_id: string
+        }
+        Update: {
+          adx_fee?: number | null
+          created_at?: string
+          dollar_rate?: number | null
+          id?: string
+          meta_fee?: number | null
+          tax_rate?: number | null
+          updated_at?: string
+          use_auto_dollar?: boolean | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      simulations: {
+        Row: {
+          cpa: number | null
+          cpa_ideal: number | null
+          created_at: string
+          dollar_rate: number
+          id: string
+          project_id: string | null
+          results_count: number
+          revenue_brl: number
+          revenue_per_result: number | null
+          revenue_usd: number
+          roi: number | null
+          status: string
+          total_spent: number
+          user_id: string
+        }
+        Insert: {
+          cpa?: number | null
+          cpa_ideal?: number | null
+          created_at?: string
+          dollar_rate: number
+          id?: string
+          project_id?: string | null
+          results_count: number
+          revenue_brl: number
+          revenue_per_result?: number | null
+          revenue_usd: number
+          roi?: number | null
+          status?: string
+          total_spent: number
+          user_id: string
+        }
+        Update: {
+          cpa?: number | null
+          cpa_ideal?: number | null
+          created_at?: string
+          dollar_rate?: number
+          id?: string
+          project_id?: string | null
+          results_count?: number
+          revenue_brl?: number
+          revenue_per_result?: number | null
+          revenue_usd?: number
+          roi?: number | null
+          status?: string
+          total_spent?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "simulations_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
