@@ -99,8 +99,30 @@ export function RoiCalculator({ effectiveDollar, simulations, onAdd, onDelete }:
                 <p>💰 Receita/resultado: <span className="font-mono font-semibold">R$ {lastResult.revenuePerResult.toFixed(2)}</span></p>
                 <p>💸 CPA: <span className="font-mono font-semibold">R$ {lastResult.cpa.toFixed(2)}</span></p>
                 <p>🎯 CPA ideal (100%): <span className="font-mono font-semibold">R$ {lastResult.cpaIdeal.toFixed(2)}</span></p>
+                <p>⚖️ CPA p/ empatar: <span className="font-mono font-semibold">R$ {lastResult.revenuePerResult.toFixed(2)}</span></p>
                 <p className="col-span-2">📊 ROI: <span className="font-mono font-bold text-lg">{lastResult.roi.toFixed(2)}%</span></p>
               </div>
+              {lastResult.status === 'loss' && (
+                <div className="mt-3 p-3 rounded border border-loss/30 bg-loss/5 text-sm space-y-1">
+                  <p className="font-semibold text-loss">💡 Sugestões para melhorar:</p>
+                  <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                    <li>Reduza o CPA: seu CPA atual (R$ {lastResult.cpa.toFixed(2)}) precisa cair para no máximo <span className="font-mono font-semibold text-foreground">R$ {lastResult.revenuePerResult.toFixed(2)}</span> para empatar.</li>
+                    <li>Otimize criativos e segmentação para aumentar a taxa de conversão.</li>
+                    <li>Teste novos públicos ou reduza o lance para diminuir o custo por resultado.</li>
+                    <li>Considere pausar campanhas com ROI muito negativo e realocar o orçamento.</li>
+                    <li>Aumente a receita por resultado: revise o layout e CTA das páginas de monetização.</li>
+                  </ul>
+                </div>
+              )}
+              {lastResult.status === 'warning' && (
+                <div className="mt-3 p-3 rounded border border-warning/30 bg-warning/5 text-sm space-y-1">
+                  <p className="font-semibold text-warning">⚠️ Atenção:</p>
+                  <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                    <li>ROI abaixo de 100%. CPA ideal: <span className="font-mono font-semibold text-foreground">R$ {lastResult.cpaIdeal.toFixed(2)}</span>.</li>
+                    <li>Pequenas otimizações de segmentação podem dobrar seu retorno.</li>
+                  </ul>
+                </div>
+              )}
             </div>
           )}
         </CardContent>
