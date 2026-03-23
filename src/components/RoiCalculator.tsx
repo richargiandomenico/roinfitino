@@ -159,6 +159,7 @@ export function RoiCalculator({ effectiveDollar, simulations, onAdd, onDelete }:
                     <TableHead>Receita/Resultado</TableHead>
                     <TableHead>CPA</TableHead>
                     <TableHead>CPA Ideal</TableHead>
+                    <TableHead>CPA Empate</TableHead>
                     <TableHead>ROI</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead></TableHead>
