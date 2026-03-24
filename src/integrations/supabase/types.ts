@@ -14,6 +14,71 @@ export type Database = {
   }
   public: {
     Tables: {
+      action_plans: {
+        Row: {
+          checklist_states: Json
+          country: string
+          created_at: string
+          daily_priorities: Json
+          extra_notes: string | null
+          goal: string | null
+          id: string
+          language: string
+          main_topic: string
+          niche: string
+          phase_notes: Json
+          project_id: string | null
+          sprint_days: number
+          start_date: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          checklist_states?: Json
+          country?: string
+          created_at?: string
+          daily_priorities?: Json
+          extra_notes?: string | null
+          goal?: string | null
+          id?: string
+          language?: string
+          main_topic: string
+          niche?: string
+          phase_notes?: Json
+          project_id?: string | null
+          sprint_days?: number
+          start_date?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          checklist_states?: Json
+          country?: string
+          created_at?: string
+          daily_priorities?: Json
+          extra_notes?: string | null
+          goal?: string | null
+          id?: string
+          language?: string
+          main_topic?: string
+          niche?: string
+          phase_notes?: Json
+          project_id?: string | null
+          sprint_days?: number
+          start_date?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "action_plans_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       funnel_records: {
         Row: {
           conv_p1_p2: number | null
