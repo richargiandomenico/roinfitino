@@ -8,9 +8,10 @@ import { SettingsDialog } from '@/components/SettingsDialog';
 import { ProjectSelector } from '@/components/ProjectSelector';
 import { RoiCalculator } from '@/components/RoiCalculator';
 import { FunnelAnalysis } from '@/components/FunnelAnalysis';
+import { ActionPlanManager } from '@/components/ActionPlanManager';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LogOut, BarChart3, Navigation } from 'lucide-react';
+import { LogOut, BarChart3, Navigation, ClipboardList } from 'lucide-react';
 
 const Index = () => {
   const { user, loading: authLoading, signOut } = useAuth();
