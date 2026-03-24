@@ -71,12 +71,15 @@ const Index = () => {
           </div>
         ) : (
           <Tabs defaultValue="roi" className="animate-fade-in">
-            <TabsList className="w-full grid grid-cols-2">
+            <TabsList className="w-full grid grid-cols-3">
               <TabsTrigger value="roi" className="flex items-center gap-2">
                 <BarChart3 className="w-4 h-4" /> Calculadora ROI
               </TabsTrigger>
               <TabsTrigger value="funnel" className="flex items-center gap-2">
                 <Navigation className="w-4 h-4" /> Análise de Funil
+              </TabsTrigger>
+              <TabsTrigger value="plan" className="flex items-center gap-2">
+                <ClipboardList className="w-4 h-4" /> Plano de Ação
               </TabsTrigger>
             </TabsList>
             <TabsContent value="roi" className="mt-4">
@@ -92,6 +95,13 @@ const Index = () => {
                 records={funnelRecords}
                 onAdd={addFunnel}
                 onDelete={deleteFunnel}
+              />
+            </TabsContent>
+            <TabsContent value="plan" className="mt-4">
+              <ActionPlanManager
+                projectId={selectedProjectId!}
+                projectName={projects.find(p => p.id === selectedProjectId)?.name || ''}
+                projectNiche={projects.find(p => p.id === selectedProjectId)?.niche || null}
               />
             </TabsContent>
           </Tabs>
