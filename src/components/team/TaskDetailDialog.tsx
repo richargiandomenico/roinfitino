@@ -2,20 +2,21 @@ import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { Plus, Trash2, Send, CheckSquare, MessageSquare, Clock } from 'lucide-react';
+import { Plus, Trash2, CheckSquare, MessageSquare, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { Task, TeamMember, TaskStatus, TaskPriority } from '@/types/team';
 import { STATUS_CONFIG, PRIORITY_CONFIG, CATEGORIES } from '@/types/team';
 import { useTaskDetail } from '@/hooks/useTaskDetail';
 import { useCurrentMember } from '@/hooks/useCurrentMember';
+import { useAuth } from '@/hooks/useAuth';
+import { CommentEditor } from './CommentEditor';
+import { CommentItem } from './CommentItem';
 
 interface Props {
   task: Task;
