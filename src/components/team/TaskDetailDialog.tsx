@@ -46,11 +46,6 @@ export function TaskDetailDialog({ task, members, projects, open, onOpenChange, 
     setNewSubtask('');
   };
 
-  const handleAddComment = () => {
-    if (!newComment.trim()) return;
-    addComment(newComment.trim());
-    setNewComment('');
-  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
