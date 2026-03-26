@@ -2,6 +2,12 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
+export interface ChecklistSubtask {
+  id: string;
+  title: string;
+  completed: boolean;
+}
+
 export interface ActionPlan {
   id: string;
   project_id: string | null;
@@ -16,6 +22,8 @@ export interface ActionPlan {
   checklist_states: Record<string, boolean>;
   phase_notes: Record<string, string>;
   daily_priorities: Record<string, string>;
+  checklist_assignees: Record<string, string>;
+  checklist_subtasks: Record<string, ChecklistSubtask[]>;
   created_at: string;
   updated_at: string;
 }
@@ -35,11 +43,13 @@ export function useActionPlans(projectId: string | null) {
       .eq('project_id', projectId)
       .order('created_at', { ascending: false });
     if (data) {
-      const parsed = data.map(d => ({
+      const parsed: ActionPlan[] = data.map(d => ({
         ...d,
         checklist_states: (d.checklist_states || {}) as Record<string, boolean>,
         phase_notes: (d.phase_notes || {}) as Record<string, string>,
         daily_priorities: (d.daily_priorities || {}) as Record<string, string>,
+        checklist_assignees: (d.checklist_assignees || {}) as Record<string, string>,
+        checklist_subtasks: (d.checklist_subtasks || {}) as unknown as Record<string, ChecklistSubtask[]>,
       }));
       setPlans(parsed);
       if (!selectedPlanId && parsed.length > 0) setSelectedPlanId(parsed[0].id);
@@ -60,19 +70,21 @@ export function useActionPlans(projectId: string | null) {
       .select()
       .single();
     if (newPlan && !error) {
-      const parsed = {
+      const parsed: ActionPlan = {
         ...newPlan,
         checklist_states: (newPlan.checklist_states || {}) as Record<string, boolean>,
         phase_notes: (newPlan.phase_notes || {}) as Record<string, string>,
         daily_priorities: (newPlan.daily_priorities || {}) as Record<string, string>,
+        checklist_assignees: (newPlan.checklist_assignees || {}) as Record<string, string>,
+        checklist_subtasks: (newPlan.checklist_subtasks || {}) as unknown as Record<string, ChecklistSubtask[]>,
       };
       setPlans(prev => [parsed, ...prev]);
       setSelectedPlanId(parsed.id);
     }
   };
 
-  const updatePlan = async (id: string, updates: Partial<Pick<ActionPlan, 'checklist_states' | 'phase_notes' | 'daily_priorities' | 'goal' | 'extra_notes'>>) => {
-    await supabase.from('action_plans').update(updates).eq('id', id);
+  const updatePlan = async (id: string, updates: Partial<Pick<ActionPlan, 'checklist_states' | 'phase_notes' | 'daily_priorities' | 'goal' | 'extra_notes' | 'checklist_assignees' | 'checklist_subtasks'>>) => {
+    await supabase.from('action_plans').update(updates as any).eq('id', id);
     setPlans(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
   };
 

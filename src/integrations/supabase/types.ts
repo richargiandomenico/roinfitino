@@ -16,7 +16,9 @@ export type Database = {
     Tables: {
       action_plans: {
         Row: {
+          checklist_assignees: Json
           checklist_states: Json
+          checklist_subtasks: Json
           country: string
           created_at: string
           daily_priorities: Json
@@ -34,7 +36,9 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          checklist_assignees?: Json
           checklist_states?: Json
+          checklist_subtasks?: Json
           country?: string
           created_at?: string
           daily_priorities?: Json
@@ -52,7 +56,9 @@ export type Database = {
           user_id: string
         }
         Update: {
+          checklist_assignees?: Json
           checklist_states?: Json
+          checklist_subtasks?: Json
           country?: string
           created_at?: string
           daily_priorities?: Json

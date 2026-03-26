@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
-import { ActionPlan, useActionPlans } from '@/hooks/useActionPlans';
+import { ActionPlan, ChecklistSubtask, useActionPlans } from '@/hooks/useActionPlans';
+import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { AiAssistantDialog } from './AiAssistantDialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,7 +10,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Plus, Trash2, CheckSquare, Bot, Calendar, Target, FileText } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { CommentEditor } from '@/components/team/CommentEditor';
+import { Plus, Trash2, CheckSquare, Bot, Calendar, Target, FileText, UserPlus, ChevronDown, ChevronRight } from 'lucide-react';
 
 const phaseTemplates = [
   {
@@ -149,7 +153,10 @@ interface Props {
 
 export function ActionPlanManager({ projectId, projectName, projectNiche }: Props) {
   const { plans, selectedPlan, selectedPlanId, setSelectedPlanId, loading, addPlan, updatePlan, deletePlan } = useActionPlans(projectId);
+  const { members } = useTeamMembers();
   const [showNewForm, setShowNewForm] = useState(false);
+  const [expandedSubtasks, setExpandedSubtasks] = useState<Record<string, boolean>>({});
+  const [newSubtaskInputs, setNewSubtaskInputs] = useState<Record<string, string>>({});
   const [form, setForm] = useState({
     niche: projectNiche || '', country: 'Brasil', language: 'Português',
     main_topic: '', start_date: new Date().toISOString().split('T')[0],
@@ -178,12 +185,41 @@ export function ActionPlanManager({ projectId, projectName, projectNiche }: Prop
     updatePlan(planId, { daily_priorities: updated });
   }, [updatePlan]);
 
+  const updateAssignee = useCallback((planId: string, key: string, memberId: string, assignees: Record<string, string>) => {
+    const updated = { ...assignees, [key]: memberId };
+    updatePlan(planId, { checklist_assignees: updated });
+  }, [updatePlan]);
+
+  const addChecklistSubtask = useCallback((planId: string, key: string, title: string, subtasks: Record<string, ChecklistSubtask[]>) => {
+    const existing = subtasks[key] || [];
+    const newItem: ChecklistSubtask = { id: crypto.randomUUID(), title, completed: false };
+    const updated = { ...subtasks, [key]: [...existing, newItem] };
+    updatePlan(planId, { checklist_subtasks: updated });
+  }, [updatePlan]);
+
+  const toggleChecklistSubtask = useCallback((planId: string, key: string, subtaskId: string, subtasks: Record<string, ChecklistSubtask[]>) => {
+    const existing = subtasks[key] || [];
+    const updated = {
+      ...subtasks,
+      [key]: existing.map(s => s.id === subtaskId ? { ...s, completed: !s.completed } : s)
+    };
+    updatePlan(planId, { checklist_subtasks: updated });
+  }, [updatePlan]);
+
+  const deleteChecklistSubtask = useCallback((planId: string, key: string, subtaskId: string, subtasks: Record<string, ChecklistSubtask[]>) => {
+    const existing = subtasks[key] || [];
+    const updated = { ...subtasks, [key]: existing.filter(s => s.id !== subtaskId) };
+    updatePlan(planId, { checklist_subtasks: updated });
+  }, [updatePlan]);
+
   const progress = useMemo(() => {
     if (!selectedPlan) return { done: 0, total: 0, pct: 0 };
     const total = phaseTemplates.reduce((sum, p) => sum + p.checklist.length, 0);
     const done = Object.values(selectedPlan.checklist_states).filter(Boolean).length;
     return { done, total, pct: total ? Math.round((done / total) * 100) : 0 };
   }, [selectedPlan]);
+
+  const activeMembers = members.filter(m => m.status === 'active');
 
   if (loading) return <div className="text-center py-8 text-muted-foreground animate-pulse">Carregando planos...</div>;
 
@@ -374,13 +410,113 @@ export function ActionPlanManager({ projectId, projectName, projectNiche }: Prop
                       {phase.checklist.map((item, i) => {
                         const key = `chk_${idx}_${i}`;
                         const checked = !!selectedPlan.checklist_states[key];
+                        const assigneeId = selectedPlan.checklist_assignees[key] || '';
+                        const assignee = members.find(m => m.id === assigneeId);
+                        const subs = selectedPlan.checklist_subtasks[key] || [];
+                        const isExpanded = expandedSubtasks[key];
+                        const completedSubs = subs.filter(s => s.completed).length;
+
                         return (
-                          <label key={i} className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${checked ? 'bg-profit/10 border-profit/30' : 'hover:bg-muted/50'}`}>
-                            <input type="checkbox" checked={checked}
-                              onChange={() => toggleCheck(selectedPlan.id, key, selectedPlan.checklist_states)}
-                              className="mt-0.5 scale-110" />
-                            <span className={`text-sm leading-relaxed ${checked ? 'line-through text-muted-foreground' : ''}`}>{item}</span>
-                          </label>
+                          <div key={i} className={`rounded-lg border transition-colors ${checked ? 'bg-profit/10 border-profit/30' : 'hover:bg-muted/50'}`}>
+                            {/* Main checklist item */}
+                            <div className="flex items-start gap-3 p-3">
+                              <input type="checkbox" checked={checked}
+                                onChange={() => toggleCheck(selectedPlan.id, key, selectedPlan.checklist_states)}
+                                className="mt-0.5 scale-110 cursor-pointer" />
+                              <div className="flex-1 min-w-0">
+                                <span className={`text-sm leading-relaxed ${checked ? 'line-through text-muted-foreground' : ''}`}>{item}</span>
+                                <div className="flex items-center gap-2 mt-2 flex-wrap">
+                                  {/* Assignee selector */}
+                                  <Select value={assigneeId} onValueChange={v => updateAssignee(selectedPlan.id, key, v, selectedPlan.checklist_assignees)}>
+                                    <SelectTrigger className="h-7 w-auto min-w-[120px] text-[11px] gap-1">
+                                      {assignee ? (
+                                        <span className="flex items-center gap-1">
+                                          <Avatar className="w-4 h-4">
+                                            <AvatarFallback className="text-[8px] bg-primary/20">{assignee.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+                                          </Avatar>
+                                          {assignee.name}
+                                        </span>
+                                      ) : (
+                                        <span className="flex items-center gap-1 text-muted-foreground">
+                                          <UserPlus className="w-3 h-3" /> Atribuir
+                                        </span>
+                                      )}
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {activeMembers.map(m => (
+                                        <SelectItem key={m.id} value={m.id} className="text-xs">{m.name}</SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+
+                                  {/* Subtasks toggle */}
+                                  <Button
+                                    variant="ghost" size="sm"
+                                    className="h-7 text-[11px] px-2 gap-1"
+                                    onClick={() => setExpandedSubtasks(prev => ({ ...prev, [key]: !prev[key] }))}
+                                  >
+                                    {isExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+                                    Subtarefas {subs.length > 0 && `(${completedSubs}/${subs.length})`}
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Subtasks area */}
+                            {isExpanded && (
+                              <div className="px-3 pb-3 pl-10 space-y-2">
+                                {subs.length > 0 && (
+                                  <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                                    <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
+                                      <div className="h-full bg-profit rounded-full transition-all" style={{ width: `${subs.length > 0 ? (completedSubs / subs.length) * 100 : 0}%` }} />
+                                    </div>
+                                    <span>{subs.length > 0 ? Math.round((completedSubs / subs.length) * 100) : 0}%</span>
+                                  </div>
+                                )}
+                                {subs.map(sub => (
+                                  <div key={sub.id} className="flex items-center gap-2 group">
+                                    <Checkbox
+                                      checked={sub.completed}
+                                      onCheckedChange={() => toggleChecklistSubtask(selectedPlan.id, key, sub.id, selectedPlan.checklist_subtasks)}
+                                      className="w-3.5 h-3.5"
+                                    />
+                                    <span className={`text-xs flex-1 ${sub.completed ? 'line-through text-muted-foreground' : ''}`}>
+                                      {sub.title}
+                                    </span>
+                                    <Button
+                                      variant="ghost" size="icon"
+                                      className="w-5 h-5 opacity-0 group-hover:opacity-100"
+                                      onClick={() => deleteChecklistSubtask(selectedPlan.id, key, sub.id, selectedPlan.checklist_subtasks)}
+                                    >
+                                      <Trash2 className="w-2.5 h-2.5 text-destructive" />
+                                    </Button>
+                                  </div>
+                                ))}
+                                <div className="flex items-center gap-2">
+                                  <Input
+                                    value={newSubtaskInputs[key] || ''}
+                                    onChange={e => setNewSubtaskInputs(prev => ({ ...prev, [key]: e.target.value }))}
+                                    placeholder="Nova subtarefa..."
+                                    className="h-7 text-xs"
+                                    onKeyDown={e => {
+                                      if (e.key === 'Enter' && (newSubtaskInputs[key] || '').trim()) {
+                                        addChecklistSubtask(selectedPlan.id, key, newSubtaskInputs[key].trim(), selectedPlan.checklist_subtasks);
+                                        setNewSubtaskInputs(prev => ({ ...prev, [key]: '' }));
+                                      }
+                                    }}
+                                  />
+                                  <Button size="sm" variant="outline" className="h-7 px-2" onClick={() => {
+                                    if ((newSubtaskInputs[key] || '').trim()) {
+                                      addChecklistSubtask(selectedPlan.id, key, newSubtaskInputs[key].trim(), selectedPlan.checklist_subtasks);
+                                      setNewSubtaskInputs(prev => ({ ...prev, [key]: '' }));
+                                    }
+                                  }}>
+                                    <Plus className="w-3 h-3" />
+                                  </Button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         );
                       })}
                     </div>
@@ -393,12 +529,11 @@ export function ActionPlanManager({ projectId, projectName, projectNiche }: Prop
                       </div>
                       <div>
                         <h4 className="text-sm font-bold mb-2">Anotações</h4>
-                        <Textarea
-                          className="text-sm"
-                          rows={5}
-                          value={selectedPlan.phase_notes[`note_${idx}`] || ''}
-                          onChange={e => updateNote(selectedPlan.id, `note_${idx}`, e.target.value, selectedPlan.phase_notes)}
-                          placeholder="Escreva suas notas, decisões e próximos passos..."
+                        <CommentEditor
+                          initialValue={selectedPlan.phase_notes[`note_${idx}`] || ''}
+                          onSubmit={(content) => updateNote(selectedPlan.id, `note_${idx}`, content, selectedPlan.phase_notes)}
+                          placeholder="Escreva suas notas, decisões e próximos passos... (Markdown suportado)"
+                          submitLabel="Salvar"
                         />
                       </div>
                       <div className="grid grid-cols-3 gap-2">
