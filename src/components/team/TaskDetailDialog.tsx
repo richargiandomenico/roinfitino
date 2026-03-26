@@ -2,20 +2,21 @@ import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { Plus, Trash2, Send, CheckSquare, MessageSquare, Clock } from 'lucide-react';
+import { Plus, Trash2, CheckSquare, MessageSquare, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { Task, TeamMember, TaskStatus, TaskPriority } from '@/types/team';
 import { STATUS_CONFIG, PRIORITY_CONFIG, CATEGORIES } from '@/types/team';
 import { useTaskDetail } from '@/hooks/useTaskDetail';
 import { useCurrentMember } from '@/hooks/useCurrentMember';
+import { useAuth } from '@/hooks/useAuth';
+import { CommentEditor } from './CommentEditor';
+import { CommentItem } from './CommentItem';
 
 interface Props {
   task: Task;
@@ -28,10 +29,10 @@ interface Props {
 }
 
 export function TaskDetailDialog({ task, members, projects, open, onOpenChange, onUpdate, onDelete }: Props) {
-  const { subtasks, comments, addSubtask, toggleSubtask, deleteSubtask, addComment } = useTaskDetail(task.id);
+  const { subtasks, comments, addSubtask, toggleSubtask, deleteSubtask, addComment, updateComment, deleteComment } = useTaskDetail(task.id);
   const { member: currentMember, isAdmin } = useCurrentMember();
+  const { user } = useAuth();
   const [newSubtask, setNewSubtask] = useState('');
-  const [newComment, setNewComment] = useState('');
 
   const assignee = members.find(m => m.id === task.assignee_id);
   const requester = members.find(m => m.id === task.requester_id);
@@ -45,11 +46,6 @@ export function TaskDetailDialog({ task, members, projects, open, onOpenChange, 
     setNewSubtask('');
   };
 
-  const handleAddComment = () => {
-    if (!newComment.trim()) return;
-    addComment(newComment.trim());
-    setNewComment('');
-  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -120,36 +116,17 @@ export function TaskDetailDialog({ task, members, projects, open, onOpenChange, 
                 {comments.map(comment => {
                   const author = members.find(m => m.user_id === comment.user_id);
                   return (
-                    <div key={comment.id} className="flex gap-2">
-                      <Avatar className="w-6 h-6 mt-0.5">
-                        <AvatarFallback className="text-[10px]">
-                          {author?.name?.charAt(0).toUpperCase() || '?'}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-medium">{author?.name || 'Usuário'}</span>
-                          <span className="text-[10px] text-muted-foreground">
-                            {format(new Date(comment.created_at), "dd/MM HH:mm", { locale: ptBR })}
-                          </span>
-                        </div>
-                        <p className="text-sm text-muted-foreground">{comment.content}</p>
-                      </div>
-                    </div>
+                    <CommentItem
+                      key={comment.id}
+                      comment={comment}
+                      author={author}
+                      isOwner={user?.id === comment.user_id}
+                      onUpdate={updateComment}
+                      onDelete={deleteComment}
+                    />
                   );
                 })}
-                <div className="flex items-center gap-2">
-                  <Input
-                    value={newComment}
-                    onChange={e => setNewComment(e.target.value)}
-                    placeholder="Escrever comentário..."
-                    className="h-8 text-sm"
-                    onKeyDown={e => e.key === 'Enter' && handleAddComment()}
-                  />
-                  <Button size="sm" variant="outline" onClick={handleAddComment} className="h-8">
-                    <Send className="w-3 h-3" />
-                  </Button>
-                </div>
+                <CommentEditor onSubmit={addComment} taskId={task.id} />
               </TabsContent>
             </Tabs>
           </div>
