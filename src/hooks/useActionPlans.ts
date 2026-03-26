@@ -84,7 +84,7 @@ export function useActionPlans(projectId: string | null) {
   };
 
   const updatePlan = async (id: string, updates: Partial<Pick<ActionPlan, 'checklist_states' | 'phase_notes' | 'daily_priorities' | 'goal' | 'extra_notes' | 'checklist_assignees' | 'checklist_subtasks'>>) => {
-    await supabase.from('action_plans').update(updates).eq('id', id);
+    await supabase.from('action_plans').update(updates as any).eq('id', id);
     setPlans(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
   };
 
