@@ -48,5 +48,15 @@ export function useTaskDetail(taskId: string | null) {
     fetchDetails();
   };
 
-  return { subtasks, comments, loading, addSubtask, toggleSubtask, deleteSubtask, addComment, refetch: fetchDetails };
+  const updateComment = async (id: string, content: string) => {
+    await (supabase as any).from('task_comments').update({ content }).eq('id', id);
+    fetchDetails();
+  };
+
+  const deleteComment = async (id: string) => {
+    await (supabase as any).from('task_comments').delete().eq('id', id);
+    fetchDetails();
+  };
+
+  return { subtasks, comments, loading, addSubtask, toggleSubtask, deleteSubtask, addComment, updateComment, deleteComment, refetch: fetchDetails };
 }
