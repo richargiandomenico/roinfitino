@@ -49,7 +49,7 @@ export function useActionPlans(projectId: string | null) {
         phase_notes: (d.phase_notes || {}) as Record<string, string>,
         daily_priorities: (d.daily_priorities || {}) as Record<string, string>,
         checklist_assignees: (d.checklist_assignees || {}) as Record<string, string>,
-        checklist_subtasks: (d.checklist_subtasks || {}) as Record<string, ChecklistSubtask[]>,
+        checklist_subtasks: (d.checklist_subtasks || {}) as unknown as Record<string, ChecklistSubtask[]>,
       }));
       setPlans(parsed);
       if (!selectedPlanId && parsed.length > 0) setSelectedPlanId(parsed[0].id);
@@ -70,18 +70,20 @@ export function useActionPlans(projectId: string | null) {
       .select()
       .single();
     if (newPlan && !error) {
-      const parsed = {
+      const parsed: ActionPlan = {
         ...newPlan,
         checklist_states: (newPlan.checklist_states || {}) as Record<string, boolean>,
         phase_notes: (newPlan.phase_notes || {}) as Record<string, string>,
         daily_priorities: (newPlan.daily_priorities || {}) as Record<string, string>,
+        checklist_assignees: (newPlan.checklist_assignees || {}) as Record<string, string>,
+        checklist_subtasks: (newPlan.checklist_subtasks || {}) as unknown as Record<string, ChecklistSubtask[]>,
       };
       setPlans(prev => [parsed, ...prev]);
       setSelectedPlanId(parsed.id);
     }
   };
 
-  const updatePlan = async (id: string, updates: Partial<Pick<ActionPlan, 'checklist_states' | 'phase_notes' | 'daily_priorities' | 'goal' | 'extra_notes'>>) => {
+  const updatePlan = async (id: string, updates: Partial<Pick<ActionPlan, 'checklist_states' | 'phase_notes' | 'daily_priorities' | 'goal' | 'extra_notes' | 'checklist_assignees' | 'checklist_subtasks'>>) => {
     await supabase.from('action_plans').update(updates).eq('id', id);
     setPlans(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
   };
