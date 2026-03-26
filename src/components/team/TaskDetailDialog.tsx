@@ -29,10 +29,10 @@ interface Props {
 }
 
 export function TaskDetailDialog({ task, members, projects, open, onOpenChange, onUpdate, onDelete }: Props) {
-  const { subtasks, comments, addSubtask, toggleSubtask, deleteSubtask, addComment } = useTaskDetail(task.id);
+  const { subtasks, comments, addSubtask, toggleSubtask, deleteSubtask, addComment, updateComment, deleteComment } = useTaskDetail(task.id);
   const { member: currentMember, isAdmin } = useCurrentMember();
+  const { user } = useAuth();
   const [newSubtask, setNewSubtask] = useState('');
-  const [newComment, setNewComment] = useState('');
 
   const assignee = members.find(m => m.id === task.assignee_id);
   const requester = members.find(m => m.id === task.requester_id);
