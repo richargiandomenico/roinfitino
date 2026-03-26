@@ -43,11 +43,13 @@ export function useActionPlans(projectId: string | null) {
       .eq('project_id', projectId)
       .order('created_at', { ascending: false });
     if (data) {
-      const parsed = data.map(d => ({
+      const parsed: ActionPlan[] = data.map(d => ({
         ...d,
         checklist_states: (d.checklist_states || {}) as Record<string, boolean>,
         phase_notes: (d.phase_notes || {}) as Record<string, string>,
         daily_priorities: (d.daily_priorities || {}) as Record<string, string>,
+        checklist_assignees: (d.checklist_assignees || {}) as Record<string, string>,
+        checklist_subtasks: (d.checklist_subtasks || {}) as Record<string, ChecklistSubtask[]>,
       }));
       setPlans(parsed);
       if (!selectedPlanId && parsed.length > 0) setSelectedPlanId(parsed[0].id);
