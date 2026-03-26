@@ -2,6 +2,12 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
+export interface ChecklistSubtask {
+  id: string;
+  title: string;
+  completed: boolean;
+}
+
 export interface ActionPlan {
   id: string;
   project_id: string | null;
@@ -16,6 +22,8 @@ export interface ActionPlan {
   checklist_states: Record<string, boolean>;
   phase_notes: Record<string, string>;
   daily_priorities: Record<string, string>;
+  checklist_assignees: Record<string, string>;
+  checklist_subtasks: Record<string, ChecklistSubtask[]>;
   created_at: string;
   updated_at: string;
 }
