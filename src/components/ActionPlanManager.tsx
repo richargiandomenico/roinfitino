@@ -547,7 +547,16 @@ export function ActionPlanManager({ projectId, projectName, projectNiche }: Prop
                         ))}
                       </div>
                       <div>
-                        <h4 className="text-sm font-bold mb-2">Anotações</h4>
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="text-sm font-bold">Anotações</h4>
+                          <Button
+                            variant="outline" size="sm"
+                            className="h-7 text-[11px] gap-1"
+                            onClick={() => createTaskFromNote(phase.title, selectedPlan.phase_notes[`note_${idx}`] || '')}
+                          >
+                            <ListTodo className="w-3 h-3" /> Criar como Tarefa
+                          </Button>
+                        </div>
                         <CommentEditor
                           initialValue={selectedPlan.phase_notes[`note_${idx}`] || ''}
                           onSubmit={(content) => updateNote(selectedPlan.id, `note_${idx}`, content, selectedPlan.phase_notes)}
