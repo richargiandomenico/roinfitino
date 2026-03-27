@@ -252,15 +252,20 @@ export type Database = {
         Row: {
           cpa: number | null
           cpa_ideal: number | null
+          cpm: number | null
           created_at: string
           dollar_rate: number
           id: string
+          impressions: number | null
+          observation: string | null
           project_id: string | null
           results_count: number
           revenue_brl: number
+          revenue_gam: number | null
           revenue_per_result: number | null
           revenue_usd: number
           roi: number | null
+          source: string | null
           status: string
           total_spent: number
           user_id: string
@@ -268,15 +273,20 @@ export type Database = {
         Insert: {
           cpa?: number | null
           cpa_ideal?: number | null
+          cpm?: number | null
           created_at?: string
           dollar_rate: number
           id?: string
+          impressions?: number | null
+          observation?: string | null
           project_id?: string | null
           results_count: number
           revenue_brl: number
+          revenue_gam?: number | null
           revenue_per_result?: number | null
           revenue_usd: number
           roi?: number | null
+          source?: string | null
           status?: string
           total_spent: number
           user_id: string
@@ -284,15 +294,20 @@ export type Database = {
         Update: {
           cpa?: number | null
           cpa_ideal?: number | null
+          cpm?: number | null
           created_at?: string
           dollar_rate?: number
           id?: string
+          impressions?: number | null
+          observation?: string | null
           project_id?: string | null
           results_count?: number
           revenue_brl?: number
+          revenue_gam?: number | null
           revenue_per_result?: number | null
           revenue_usd?: number
           roi?: number | null
+          source?: string | null
           status?: string
           total_spent?: number
           user_id?: string
