@@ -156,6 +156,7 @@ interface Props {
 export function ActionPlanManager({ projectId, projectName, projectNiche }: Props) {
   const { plans, selectedPlan, selectedPlanId, setSelectedPlanId, loading, addPlan, updatePlan, deletePlan } = useActionPlans(projectId);
   const { members } = useTeamMembers();
+  const { addTask } = useTasks();
   const [showNewForm, setShowNewForm] = useState(false);
   const [expandedSubtasks, setExpandedSubtasks] = useState<Record<string, boolean>>({});
   const [newSubtaskInputs, setNewSubtaskInputs] = useState<Record<string, string>>({});
