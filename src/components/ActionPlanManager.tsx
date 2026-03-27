@@ -231,6 +231,7 @@ export function ActionPlanManager({ projectId, projectName, projectNiche }: Prop
     } catch { /* toast already shown */ }
   }, [addTask, projectId]);
 
+  const progress = useMemo(() => {
     if (!selectedPlan) return { done: 0, total: 0, pct: 0 };
     const total = phaseTemplates.reduce((sum, p) => sum + p.checklist.length, 0);
     const done = Object.values(selectedPlan.checklist_states).filter(Boolean).length;
