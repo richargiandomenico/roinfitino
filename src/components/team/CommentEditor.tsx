@@ -1,8 +1,10 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Toggle } from '@/components/ui/toggle';
-import { Bold, Italic, List, Link2, ImagePlus, Send, X } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { Bold, Italic, List, Link2, ImagePlus, Send, X, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface Props {
   initialValue?: string;
@@ -15,7 +17,13 @@ interface Props {
 
 export function CommentEditor({ initialValue = '', onSubmit, onCancel, placeholder = 'Escrever comentário...', submitLabel }: Props) {
   const [content, setContent] = useState(initialValue);
+  const [uploading, setUploading] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Sync internal state when initialValue changes (e.g. after save)
+  useEffect(() => {
+    setContent(initialValue);
+  }, [initialValue]);
 
   const wrapSelection = (before: string, after: string) => {
     const ta = textareaRef.current;
@@ -46,17 +54,32 @@ export function CommentEditor({ initialValue = '', onSubmit, onCancel, placehold
   const handleSubmit = () => {
     if (!content.trim()) return;
     onSubmit(content.trim());
-    if (!initialValue) setContent('');
   };
 
-  const handleImageUpload = () => {
+  const handleImageUpload = async () => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
-    input.onchange = (e) => {
+    input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        insertAtCursor(`![${file.name}](imagem anexada)`);
+      if (!file) return;
+      setUploading(true);
+      try {
+        const ext = file.name.split('.').pop();
+        const path = `notes/${crypto.randomUUID()}.${ext}`;
+        const { error } = await supabase.storage
+          .from('task-attachments')
+          .upload(path, file, { upsert: true });
+        if (error) throw error;
+        const { data: urlData } = supabase.storage
+          .from('task-attachments')
+          .getPublicUrl(path);
+        insertAtCursor(`![${file.name}](${urlData.publicUrl})`);
+        toast.success('Imagem anexada!');
+      } catch {
+        toast.error('Erro ao enviar imagem');
+      } finally {
+        setUploading(false);
       }
     };
     input.click();
@@ -77,8 +100,8 @@ export function CommentEditor({ initialValue = '', onSubmit, onCancel, placehold
         <Toggle size="sm" className="h-7 w-7 p-0" onPressedChange={() => wrapSelection('[', '](url)')} title="Link">
           <Link2 className="w-3.5 h-3.5" />
         </Toggle>
-        <Toggle size="sm" className="h-7 w-7 p-0" onPressedChange={handleImageUpload} title="Imagem">
-          <ImagePlus className="w-3.5 h-3.5" />
+        <Toggle size="sm" className="h-7 w-7 p-0" onPressedChange={handleImageUpload} title="Imagem" disabled={uploading}>
+          {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ImagePlus className="w-3.5 h-3.5" />}
         </Toggle>
       </div>
       <Textarea
@@ -102,7 +125,7 @@ export function CommentEditor({ initialValue = '', onSubmit, onCancel, placehold
               <X className="w-3 h-3 mr-1" /> Cancelar
             </Button>
           )}
-          <Button size="sm" onClick={handleSubmit} className="h-7 text-xs px-3" disabled={!content.trim()}>
+          <Button size="sm" onClick={handleSubmit} className="h-7 text-xs px-3" disabled={!content.trim() || uploading}>
             {submitLabel || <><Send className="w-3 h-3 mr-1" /> Enviar</>}
           </Button>
         </div>
