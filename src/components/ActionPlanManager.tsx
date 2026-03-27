@@ -13,7 +13,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Checkbox } from '@/components/ui/checkbox';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { CommentEditor } from '@/components/team/CommentEditor';
-import { Plus, Trash2, CheckSquare, Bot, Calendar, Target, FileText, UserPlus, ChevronDown, ChevronRight } from 'lucide-react';
+import { Plus, Trash2, CheckSquare, Bot, Calendar, Target, FileText, UserPlus, ChevronDown, ChevronRight, ListTodo } from 'lucide-react';
+import { useTasks } from '@/hooks/useTasks';
+import { toast } from 'sonner';
 
 const phaseTemplates = [
   {
@@ -154,6 +156,7 @@ interface Props {
 export function ActionPlanManager({ projectId, projectName, projectNiche }: Props) {
   const { plans, selectedPlan, selectedPlanId, setSelectedPlanId, loading, addPlan, updatePlan, deletePlan } = useActionPlans(projectId);
   const { members } = useTeamMembers();
+  const { addTask } = useTasks();
   const [showNewForm, setShowNewForm] = useState(false);
   const [expandedSubtasks, setExpandedSubtasks] = useState<Record<string, boolean>>({});
   const [newSubtaskInputs, setNewSubtaskInputs] = useState<Record<string, string>>({});
@@ -211,6 +214,22 @@ export function ActionPlanManager({ projectId, projectName, projectNiche }: Prop
     const updated = { ...subtasks, [key]: existing.filter(s => s.id !== subtaskId) };
     updatePlan(planId, { checklist_subtasks: updated });
   }, [updatePlan]);
+
+  const createTaskFromNote = useCallback(async (phaseTitle: string, noteContent: string, assigneeId?: string) => {
+    if (!noteContent.trim()) { toast.error('Escreva uma anotação antes de criar a tarefa'); return; }
+    try {
+      await addTask({
+        title: `[${phaseTitle}] ${noteContent.slice(0, 100)}`,
+        description: noteContent,
+        assignee_id: assigneeId || null,
+        project_id: projectId,
+        status: 'todo' as any,
+        priority: 'medium' as any,
+        category: 'Plano de Ação',
+      });
+      toast.success('Tarefa criada a partir da anotação!');
+    } catch { /* toast already shown */ }
+  }, [addTask, projectId]);
 
   const progress = useMemo(() => {
     if (!selectedPlan) return { done: 0, total: 0, pct: 0 };
@@ -528,7 +547,16 @@ export function ActionPlanManager({ projectId, projectName, projectNiche }: Prop
                         ))}
                       </div>
                       <div>
-                        <h4 className="text-sm font-bold mb-2">Anotações</h4>
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="text-sm font-bold">Anotações</h4>
+                          <Button
+                            variant="outline" size="sm"
+                            className="h-7 text-[11px] gap-1"
+                            onClick={() => createTaskFromNote(phase.title, selectedPlan.phase_notes[`note_${idx}`] || '')}
+                          >
+                            <ListTodo className="w-3 h-3" /> Criar como Tarefa
+                          </Button>
+                        </div>
                         <CommentEditor
                           initialValue={selectedPlan.phase_notes[`note_${idx}`] || ''}
                           onSubmit={(content) => updateNote(selectedPlan.id, `note_${idx}`, content, selectedPlan.phase_notes)}
