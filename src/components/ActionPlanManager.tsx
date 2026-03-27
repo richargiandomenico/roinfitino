@@ -13,7 +13,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Checkbox } from '@/components/ui/checkbox';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { CommentEditor } from '@/components/team/CommentEditor';
-import { Plus, Trash2, CheckSquare, Bot, Calendar, Target, FileText, UserPlus, ChevronDown, ChevronRight } from 'lucide-react';
+import { Plus, Trash2, CheckSquare, Bot, Calendar, Target, FileText, UserPlus, ChevronDown, ChevronRight, ListTodo } from 'lucide-react';
+import { useTasks } from '@/hooks/useTasks';
+import { toast } from 'sonner';
 
 const phaseTemplates = [
   {
