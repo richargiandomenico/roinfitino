@@ -215,7 +215,22 @@ export function ActionPlanManager({ projectId, projectName, projectNiche }: Prop
     updatePlan(planId, { checklist_subtasks: updated });
   }, [updatePlan]);
 
-  const progress = useMemo(() => {
+  const createTaskFromNote = useCallback(async (phaseTitle: string, noteContent: string, assigneeId?: string) => {
+    if (!noteContent.trim()) { toast.error('Escreva uma anotação antes de criar a tarefa'); return; }
+    try {
+      await addTask({
+        title: `[${phaseTitle}] ${noteContent.slice(0, 100)}`,
+        description: noteContent,
+        assignee_id: assigneeId || null,
+        project_id: projectId,
+        status: 'todo' as any,
+        priority: 'medium' as any,
+        category: 'Plano de Ação',
+      });
+      toast.success('Tarefa criada a partir da anotação!');
+    } catch { /* toast already shown */ }
+  }, [addTask, projectId]);
+
     if (!selectedPlan) return { done: 0, total: 0, pct: 0 };
     const total = phaseTemplates.reduce((sum, p) => sum + p.checklist.length, 0);
     const done = Object.values(selectedPlan.checklist_states).filter(Boolean).length;
