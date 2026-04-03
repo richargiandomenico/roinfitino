@@ -5,6 +5,7 @@ import { useDollarRate } from './useDollarRate';
 
 export interface Settings {
   dollar_rate: number;
+  euro_rate: number;
   use_auto_dollar: boolean;
   meta_fee: number;
   adx_fee: number;
@@ -13,6 +14,7 @@ export interface Settings {
 
 const DEFAULTS: Settings = {
   dollar_rate: 5.50,
+  euro_rate: 6.10,
   use_auto_dollar: true,
   meta_fee: 0,
   adx_fee: 10,
