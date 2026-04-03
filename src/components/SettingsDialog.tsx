@@ -10,7 +10,9 @@ import { Settings as SettingsIcon, DollarSign, Percent } from 'lucide-react';
 interface Props {
   settings: Settings;
   effectiveDollar: number;
+  effectiveEuro: number;
   autoRate: number;
+  autoEuroRate: number;
   onSave: (s: Settings) => Promise<void>;
 }
 
