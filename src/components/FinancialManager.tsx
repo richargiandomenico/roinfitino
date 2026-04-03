@@ -50,6 +50,8 @@ export function FinancialManager({ projectId, projectName }: Props) {
   const [editDate, setEditDate] = useState('');
   const [editInvestment, setEditInvestment] = useState('');
   const [editRevenueBrl, setEditRevenueBrl] = useState('');
+  const [editRevenueForeign, setEditRevenueForeign] = useState('');
+  const [editCurrency, setEditCurrency] = useState<'BRL' | 'USD' | 'EUR'>('BRL');
   const [editOtherCosts, setEditOtherCosts] = useState('');
   const [editObservation, setEditObservation] = useState('');
   const [editCategory, setEditCategory] = useState('trafego');
@@ -100,6 +102,14 @@ export function FinancialManager({ projectId, projectName }: Props) {
     setEditDate(r.record_date);
     setEditInvestment(String(r.investment));
     setEditRevenueBrl(String(r.revenue_brl));
+    setEditRevenueForeign('');
+    setEditCurrency('BRL');
+    // Try to parse original currency from observation e.g. [USD 0.42 @ 5.1000]
+    const match = r.observation?.match(/\[(USD|EUR)\s+([\d.]+)\s+@\s+([\d.]+)\]/);
+    if (match) {
+      setEditCurrency(match[1] as 'USD' | 'EUR');
+      setEditRevenueForeign(match[2]);
+    }
     setEditOtherCosts(String(r.other_costs));
     setEditObservation(r.observation);
     setEditCategory(r.category);
@@ -108,8 +118,22 @@ export function FinancialManager({ projectId, projectName }: Props) {
   const handleUpdate = async () => {
     if (!editRecord) return;
     const inv = parseFloat(editInvestment);
-    const revBrl = parseFloat(editRevenueBrl);
-    if (isNaN(inv) || isNaN(revBrl)) return;
+    let revBrl: number;
+    let obs = editObservation;
+
+    if (editCurrency !== 'BRL') {
+      const foreignVal = parseFloat(editRevenueForeign);
+      if (isNaN(inv) || isNaN(foreignVal)) return;
+      const rate = editCurrency === 'EUR' ? effectiveEuro : effectiveDollar;
+      revBrl = foreignVal * rate;
+      // Update observation with new conversion info
+      const cleanObs = obs.replace(/\[(USD|EUR)\s+[\d.]+\s+@\s+[\d.]+\]\s*/, '').trim();
+      obs = `[${editCurrency} ${foreignVal.toFixed(2)} @ ${rate.toFixed(4)}] ${cleanObs}`.trim();
+    } else {
+      revBrl = parseFloat(editRevenueBrl);
+      if (isNaN(inv) || isNaN(revBrl)) return;
+    }
+
     await updateRecord(editRecord.id, {
       record_date: editDate,
       investment: inv,
@@ -117,7 +141,7 @@ export function FinancialManager({ projectId, projectName }: Props) {
       adx_fee_pct: settings.adx_fee,
       tax_pct: settings.tax_rate,
       other_costs: parseFloat(editOtherCosts) || 0,
-      observation: editObservation,
+      observation: obs,
       category: editCategory,
     });
     setEditRecord(null);
@@ -381,15 +405,38 @@ export function FinancialManager({ projectId, projectName }: Props) {
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-xs text-muted-foreground">Investimento (R$)</label>
                 <Input type="number" value={editInvestment} onChange={e => setEditInvestment(e.target.value)} />
               </div>
               <div>
-                <label className="text-xs text-muted-foreground">Receita BRL (R$)</label>
-                <Input type="number" value={editRevenueBrl} onChange={e => setEditRevenueBrl(e.target.value)} />
+                <label className="text-xs text-muted-foreground">Moeda da Receita</label>
+                <Select value={editCurrency} onValueChange={v => setEditCurrency(v as 'BRL' | 'USD' | 'EUR')}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="BRL">BRL (Real)</SelectItem>
+                    <SelectItem value="USD">USD (Dólar)</SelectItem>
+                    <SelectItem value="EUR">EUR (Euro)</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              {editCurrency === 'BRL' ? (
+                <div>
+                  <label className="text-xs text-muted-foreground">Receita (R$)</label>
+                  <Input type="number" value={editRevenueBrl} onChange={e => setEditRevenueBrl(e.target.value)} />
+                </div>
+              ) : (
+                <div>
+                  <label className="text-xs text-muted-foreground">Receita ({editCurrency})</label>
+                  <Input type="number" value={editRevenueForeign} onChange={e => setEditRevenueForeign(e.target.value)} placeholder={`Valor em ${editCurrency}`} />
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    ≈ R$ {((parseFloat(editRevenueForeign) || 0) * (editCurrency === 'EUR' ? effectiveEuro : effectiveDollar)).toFixed(2)}
+                  </p>
+                </div>
+              )}
               <div>
                 <label className="text-xs text-muted-foreground">Outros Custos (R$)</label>
                 <Input type="number" value={editOtherCosts} onChange={e => setEditOtherCosts(e.target.value)} />
