@@ -44,14 +44,15 @@ export function useCurrentMember() {
           .maybeSingle();
 
         if (!roleData) {
+          // First user ever gets super_admin, others get collaborator
           const { count } = await (supabase as any)
-            .from('user_roles')
+            .from('team_members')
             .select('*', { count: 'exact', head: true });
 
-          const newRole: AppRole = (count || 0) === 0 ? 'super_admin' : 'collaborator';
+          const newRole: AppRole = (count || 0) <= 1 ? 'super_admin' : 'collaborator';
           await (supabase as any)
             .from('user_roles')
-            .insert({ user_id: user.id, role: newRole });
+            .upsert({ user_id: user.id, role: newRole }, { onConflict: 'user_id' });
           setRole(newRole);
         } else {
           setRole(roleData.role as AppRole);
