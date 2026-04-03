@@ -1,16 +1,10 @@
 import { useAuth } from '@/hooks/useAuth';
+import { useCurrentMember } from '@/hooks/useCurrentMember';
 import { useProjects, Project } from '@/hooks/useProjects';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { LogOut, BarChart3, CheckSquare, Users, Globe } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
-
-const links = [
-  { to: '/', label: 'Dashboard', icon: BarChart3 },
-  { to: '/projects', label: 'Projetos', icon: Globe },
-  { to: '/tasks', label: 'Tarefas', icon: CheckSquare },
-  { to: '/team', label: 'Equipe', icon: Users },
-];
 
 interface TeamNavProps {
   children?: React.ReactNode;
