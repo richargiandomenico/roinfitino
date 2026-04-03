@@ -87,7 +87,7 @@ export function ProjectMembersManager({ projectId, projectOwnerId }: Props) {
               </AvatarFallback>
             </Avatar>
             <span className="text-xs">{m.name}</span>
-            {isAdmin && (
+            {canManageMembers && (
               <button
                 onClick={() => handleRemove(m.id)}
                 className="ml-1 rounded-full p-0.5 hover:bg-destructive/20 transition-colors"
