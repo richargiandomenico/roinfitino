@@ -100,7 +100,7 @@ export function ProjectMembersManager({ projectId, projectOwnerId }: Props) {
       </div>
 
       {/* Add member (available to admins and project owner) */}
-      {availableMembers.length > 0 && (
+      {canManageMembers && availableMembers.length > 0 && (
         <div className="flex items-center gap-2">
           <Select value={selectedMember} onValueChange={setSelectedMember}>
             <SelectTrigger className="h-8 text-xs flex-1">
