@@ -2,20 +2,20 @@ import { useState, useMemo } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useSettings } from '@/hooks/useSettings';
 import { useProjects } from '@/hooks/useProjects';
-import { useSimulations } from '@/hooks/useSimulations';
-import { useFunnelRecords } from '@/hooks/useFunnelRecords';
+import { useCurrentMember } from '@/hooks/useCurrentMember';
+import { useTasks } from '@/hooks/useTasks';
 import { AuthPage } from '@/components/AuthPage';
 import { SettingsDialog } from '@/components/SettingsDialog';
-import { ProjectSelector } from '@/components/ProjectSelector';
-import { RoiCalculator } from '@/components/RoiCalculator';
-import { FunnelAnalysis } from '@/components/FunnelAnalysis';
-import { ActionPlanManager } from '@/components/ActionPlanManager';
 import { TeamNav } from '@/components/team/TeamNav';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar } from '@/components/ui/calendar';
-import { BarChart3, Navigation, ClipboardList, Heart, Shield, Zap, Target, Star } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Heart, Shield, Zap, Target, Star, CalendarDays, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { format, isSameDay, parseISO } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { PRIORITY_CONFIG, STATUS_CONFIG } from '@/types/team';
+import type { DayContentProps } from 'react-day-picker';
 
 const MOTIVATIONAL_QUOTES = [
   { text: 'O sucesso é a soma de pequenos esforços repetidos dia após dia.', author: 'Robert Collier' },
@@ -37,16 +37,49 @@ const COMPANY_VALUES = [
 
 const Index = () => {
   const { user, loading: authLoading } = useAuth();
-  const { settings, effectiveDollar, autoRate, loading: settingsLoading, saveSettings } = useSettings();
-  const { projects, selectedProjectId, setSelectedProjectId, loading: projectsLoading, addProject, deleteProject } = useProjects();
-  const { simulations, loading: simsLoading, addSimulation, deleteSimulation } = useSimulations(selectedProjectId);
-  const { records: funnelRecords, loading: funnelLoading, addRecord: addFunnel, deleteRecord: deleteFunnel } = useFunnelRecords(selectedProjectId);
+  const { settings, effectiveDollar, autoRate, saveSettings } = useSettings();
+  const { projects, selectedProjectId, setSelectedProjectId } = useProjects();
+  const { member } = useCurrentMember();
+  const { tasks } = useTasks();
   const [calendarDate, setCalendarDate] = useState<Date | undefined>(new Date());
 
   const todayQuote = useMemo(() => {
     const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
     return MOTIVATIONAL_QUOTES[dayOfYear % MOTIVATIONAL_QUOTES.length];
   }, []);
+
+  // Tasks assigned to current member with due dates
+  const myTasksWithDue = useMemo(() => {
+    if (!member) return [];
+    return tasks.filter(t => t.assignee_id === member.id && t.due_date && t.status !== 'done' && t.status !== 'cancelled');
+  }, [tasks, member]);
+
+  // Dates that have tasks
+  const taskDates = useMemo(() => {
+    const dates: Date[] = [];
+    myTasksWithDue.forEach(t => {
+      if (t.due_date) dates.push(parseISO(t.due_date));
+    });
+    return dates;
+  }, [myTasksWithDue]);
+
+  // Tasks for selected date
+  const tasksForSelectedDate = useMemo(() => {
+    if (!calendarDate) return [];
+    return myTasksWithDue.filter(t => t.due_date && isSameDay(parseISO(t.due_date), calendarDate));
+  }, [myTasksWithDue, calendarDate]);
+
+  // Upcoming tasks (next 7 days)
+  const upcomingTasks = useMemo(() => {
+    const now = new Date();
+    const in7Days = new Date(now.getTime() + 7 * 86400000);
+    return myTasksWithDue
+      .filter(t => {
+        const d = parseISO(t.due_date!);
+        return d >= now && d <= in7Days;
+      })
+      .sort((a, b) => new Date(a.due_date!).getTime() - new Date(b.due_date!).getTime());
+  }, [myTasksWithDue]);
 
   if (authLoading) {
     return (
@@ -58,38 +91,105 @@ const Index = () => {
 
   if (!user) return <AuthPage />;
 
+  // Custom day content to show dots for task dates
+  const modifiers = { hasTask: taskDates };
+  const modifiersStyles = {
+    hasTask: {
+      position: 'relative' as const,
+    },
+  };
+
   return (
     <div className="min-h-screen bg-background">
-      <TeamNav
-        projects={projects}
-        selectedProjectId={selectedProjectId}
-        onSelectProject={setSelectedProjectId}
-      >
+      <TeamNav projects={projects} selectedProjectId={selectedProjectId} onSelectProject={setSelectedProjectId}>
         <SettingsDialog settings={settings} effectiveDollar={effectiveDollar} autoRate={autoRate} onSave={saveSettings} />
       </TeamNav>
 
       <main className="container max-w-6xl mx-auto px-4 py-6 space-y-6">
-        {/* Dashboard Header */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* Frase motivacional */}
-          <Card className="lg:col-span-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
-            <CardContent className="py-6 flex flex-col justify-center min-h-[140px]">
-              <blockquote className="text-lg font-display italic text-foreground leading-relaxed">
-                "{todayQuote.text}"
-              </blockquote>
-              <p className="text-sm text-muted-foreground mt-3 font-medium">— {todayQuote.author}</p>
-            </CardContent>
-          </Card>
+        {/* Frase motivacional */}
+        <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+          <CardContent className="py-6">
+            <blockquote className="text-lg font-display italic text-foreground leading-relaxed">
+              "{todayQuote.text}"
+            </blockquote>
+            <p className="text-sm text-muted-foreground mt-3 font-medium">— {todayQuote.author}</p>
+          </CardContent>
+        </Card>
 
-          {/* Mini calendário */}
-          <Card>
-            <CardContent className="p-2 flex items-center justify-center">
+        {/* Calendar + Upcoming Tasks */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <Card className="lg:col-span-2">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base flex items-center gap-2">
+                <CalendarDays className="w-4 h-4 text-primary" />
+                Calendário de Entregas
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col sm:flex-row gap-4">
               <Calendar
                 mode="single"
                 selected={calendarDate}
                 onSelect={setCalendarDate}
-                className={cn("p-1 pointer-events-auto text-xs")}
+                locale={ptBR}
+                modifiers={modifiers}
+                modifiersClassNames={{ hasTask: 'task-day-dot' }}
+                className={cn("p-3 pointer-events-auto")}
               />
+              <div className="flex-1 min-w-0">
+                <h3 className="text-sm font-semibold mb-2">
+                  {calendarDate ? format(calendarDate, "dd 'de' MMMM", { locale: ptBR }) : 'Selecione um dia'}
+                </h3>
+                {tasksForSelectedDate.length === 0 ? (
+                  <p className="text-xs text-muted-foreground">Nenhuma tarefa para este dia.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {tasksForSelectedDate.map(task => (
+                      <div key={task.id} className="p-2 rounded-md border bg-muted/30 space-y-1">
+                        <p className="text-sm font-medium truncate">{task.title}</p>
+                        <div className="flex gap-1">
+                          <Badge variant="outline" className={cn("text-[10px]", PRIORITY_CONFIG[task.priority].color)}>
+                            {PRIORITY_CONFIG[task.priority].label}
+                          </Badge>
+                          <Badge variant="outline" className={cn("text-[10px]", STATUS_CONFIG[task.status].color)}>
+                            {STATUS_CONFIG[task.status].label}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Próximas entregas */}
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Clock className="w-4 h-4 text-warning" />
+                Próximas Entregas
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {upcomingTasks.length === 0 ? (
+                <p className="text-xs text-muted-foreground">Nenhuma tarefa nos próximos 7 dias.</p>
+              ) : (
+                <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                  {upcomingTasks.map(task => (
+                    <div key={task.id} className="p-2 rounded-md border bg-muted/20 space-y-1">
+                      <p className="text-sm font-medium truncate">{task.title}</p>
+                      <div className="flex items-center justify-between">
+                        <Badge variant="outline" className={cn("text-[10px]", PRIORITY_CONFIG[task.priority].color)}>
+                          {PRIORITY_CONFIG[task.priority].label}
+                        </Badge>
+                        <span className="text-[10px] text-muted-foreground">
+                          {format(parseISO(task.due_date!), 'dd/MM')}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -111,62 +211,6 @@ const Index = () => {
             ))}
           </div>
         </div>
-
-        {/* Seletor de projetos */}
-        <div className="flex items-center justify-between flex-wrap gap-3">
-          <ProjectSelector
-            projects={projects}
-            selectedProjectId={selectedProjectId}
-            onSelect={setSelectedProjectId}
-            onAdd={addProject}
-            onDelete={deleteProject}
-          />
-          <p className="text-xs text-muted-foreground">
-            Dólar: <span className="font-mono text-profit font-semibold">R$ {effectiveDollar.toFixed(4)}</span>
-          </p>
-        </div>
-
-        {!selectedProjectId ? (
-          <div className="text-center py-20">
-            <p className="text-muted-foreground">Crie um projeto para começar a analisar seus ROIs.</p>
-          </div>
-        ) : (
-          <Tabs defaultValue="roi" className="animate-fade-in">
-            <TabsList className="w-full grid grid-cols-3">
-              <TabsTrigger value="roi" className="flex items-center gap-2">
-                <BarChart3 className="w-4 h-4" /> Calculadora ROI
-              </TabsTrigger>
-              <TabsTrigger value="funnel" className="flex items-center gap-2">
-                <Navigation className="w-4 h-4" /> Análise de Funil
-              </TabsTrigger>
-              <TabsTrigger value="plan" className="flex items-center gap-2">
-                <ClipboardList className="w-4 h-4" /> Plano de Ação
-              </TabsTrigger>
-            </TabsList>
-            <TabsContent value="roi" className="mt-4">
-              <RoiCalculator
-                effectiveDollar={effectiveDollar}
-                simulations={simulations}
-                onAdd={addSimulation}
-                onDelete={deleteSimulation}
-              />
-            </TabsContent>
-            <TabsContent value="funnel" className="mt-4">
-              <FunnelAnalysis
-                records={funnelRecords}
-                onAdd={addFunnel}
-                onDelete={deleteFunnel}
-              />
-            </TabsContent>
-            <TabsContent value="plan" className="mt-4">
-              <ActionPlanManager
-                projectId={selectedProjectId!}
-                projectName={projects.find(p => p.id === selectedProjectId)?.name || ''}
-                projectNiche={projects.find(p => p.id === selectedProjectId)?.niche || null}
-              />
-            </TabsContent>
-          </Tabs>
-        )}
       </main>
     </div>
   );
