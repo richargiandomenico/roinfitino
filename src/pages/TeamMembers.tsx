@@ -58,6 +58,13 @@ export default function TeamMembers() {
     return <div className="min-h-screen flex items-center justify-center bg-background"><div className="animate-pulse text-muted-foreground">Carregando...</div></div>;
   }
   if (!user) return <AuthPage />;
+  if (!isSuperAdmin && currentRole !== 'admin') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <p className="text-muted-foreground">Você não tem permissão para acessar esta página.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
