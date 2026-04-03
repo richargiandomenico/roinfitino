@@ -25,8 +25,7 @@ export default function TeamMembers() {
   const handleRoleChange = async (userId: string, newRole: AppRole) => {
     const { error } = await (supabase as any)
       .from('user_roles')
-      .update({ role: newRole })
-      .eq('user_id', userId);
+      .upsert({ user_id: userId, role: newRole }, { onConflict: 'user_id' });
     if (error) {
       toast.error('Erro ao alterar cargo');
     } else {

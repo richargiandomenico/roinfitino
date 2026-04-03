@@ -24,7 +24,7 @@ export function useFunnelRecords(projectId: string | null) {
   const fetchRecords = useCallback(async () => {
     if (!user || !projectId) { setRecords([]); setLoading(false); return; }
     const { data } = await supabase.from('funnel_records').select('*')
-      .eq('user_id', user.id).eq('project_id', projectId)
+      .eq('project_id', projectId)
       .order('created_at', { ascending: false });
     if (data) setRecords(data.map(d => ({
       ...d,

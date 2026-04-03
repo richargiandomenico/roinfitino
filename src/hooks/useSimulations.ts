@@ -60,7 +60,7 @@ export function useSimulations(projectId: string | null) {
   const fetchSimulations = useCallback(async () => {
     if (!user || !projectId) { setSimulations([]); setLoading(false); return; }
     const { data } = await supabase.from('simulations').select('*')
-      .eq('user_id', user.id).eq('project_id', projectId)
+      .eq('project_id', projectId)
       .order('created_at', { ascending: false });
     if (data) setSimulations(data.map(mapRow));
     setLoading(false);

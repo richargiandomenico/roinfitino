@@ -68,7 +68,7 @@ export function useFinancialRecords(projectId: string | null) {
   const fetchRecords = useCallback(async () => {
     if (!user || !projectId) { setRecords([]); setLoading(false); return; }
     const { data } = await (supabase.from('financial_records') as any).select('*')
-      .eq('user_id', user.id).eq('project_id', projectId)
+      .eq('project_id', projectId)
       .order('record_date', { ascending: false });
     if (data) setRecords(data.map(mapRow));
     setLoading(false);

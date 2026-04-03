@@ -39,7 +39,6 @@ export function useActionPlans(projectId: string | null) {
     const { data } = await supabase
       .from('action_plans')
       .select('*')
-      .eq('user_id', user.id)
       .eq('project_id', projectId)
       .order('created_at', { ascending: false });
     if (data) {
