@@ -59,6 +59,8 @@ export default function Projects() {
             <p className="text-muted-foreground">Crie um projeto para começar a analisar seus ROIs.</p>
           </div>
         ) : (
+          <>
+            <ProjectMembersManager projectId={selectedProjectId} />
           <Tabs defaultValue="plan" className="animate-fade-in">
             <TabsList className="w-full grid grid-cols-4">
               <TabsTrigger value="plan" className="flex items-center gap-2">
