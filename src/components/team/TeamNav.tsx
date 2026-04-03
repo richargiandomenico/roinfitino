@@ -1,6 +1,8 @@
 import { useAuth } from '@/hooks/useAuth';
+import { useProjects, Project } from '@/hooks/useProjects';
 import { Button } from '@/components/ui/button';
-import { LogOut, BarChart3, CheckSquare, Users } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { LogOut, BarChart3, CheckSquare, Users, Globe } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
 const links = [
@@ -9,7 +11,14 @@ const links = [
   { to: '/team', label: 'Equipe', icon: Users },
 ];
 
-export function TeamNav({ children }: { children?: React.ReactNode }) {
+interface TeamNavProps {
+  children?: React.ReactNode;
+  projects?: Project[];
+  selectedProjectId?: string | null;
+  onSelectProject?: (id: string) => void;
+}
+
+export function TeamNav({ children, projects, selectedProjectId, onSelectProject }: TeamNavProps) {
   const { signOut } = useAuth();
   const location = useLocation();
 
@@ -41,6 +50,21 @@ export function TeamNav({ children }: { children?: React.ReactNode }) {
           </nav>
         </div>
         <div className="flex items-center gap-2">
+          {projects && projects.length > 0 && onSelectProject && (
+            <Select value={selectedProjectId || ''} onValueChange={onSelectProject}>
+              <SelectTrigger className="w-[180px] h-9 text-xs">
+                <Globe className="w-3 h-3 mr-1 text-muted-foreground" />
+                <SelectValue placeholder="Projeto" />
+              </SelectTrigger>
+              <SelectContent>
+                {projects.map(p => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
           {children}
           <Button variant="ghost" size="sm" onClick={signOut}>
             <LogOut className="w-4 h-4" />
