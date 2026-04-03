@@ -147,8 +147,8 @@ export function FinancialManager({ projectId, projectName }: Props) {
               </div>
               {revenue && !isNaN(parseFloat(revenue)) && (
                 <p className="text-[10px] text-muted-foreground mt-0.5">
-                  ≈ {brl(parseFloat(revenue) * (revenueCurrency === 'EUR' ? euroRate : dollarRate))}
-                  <span className="ml-1">({revenueCurrency === 'EUR' ? `€1 = R$${euroRate.toFixed(4)}` : `$1 = R$${dollarRate.toFixed(4)}`})</span>
+                  ≈ {brl(parseFloat(revenue) * (revenueCurrency === 'EUR' ? effectiveEuro : effectiveDollar))}
+                  <span className="ml-1">({revenueCurrency === 'EUR' ? `€1 = R$${effectiveEuro.toFixed(4)}` : `$1 = R$${effectiveDollar.toFixed(4)}`})</span>
                 </p>
               )}
             </div>
