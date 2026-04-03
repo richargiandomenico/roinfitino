@@ -23,9 +23,11 @@ export function useFunnelRecords(projectId: string | null) {
 
   const fetchRecords = useCallback(async () => {
     if (!user || !projectId) { setRecords([]); setLoading(false); return; }
-    const { data } = await supabase.from('funnel_records').select('*')
+    setLoading(true);
+    const { data, error } = await supabase.from('funnel_records').select('*')
       .eq('project_id', projectId)
       .order('created_at', { ascending: false });
+    if (error) console.error('Error fetching funnel records:', error);
     if (data) setRecords(data.map(d => ({
       ...d,
       conv_p1_p2: Number(d.conv_p1_p2),
@@ -34,6 +36,7 @@ export function useFunnelRecords(projectId: string | null) {
       drop_p1_p2: Number(d.drop_p1_p2),
       drop_p1_p3: Number(d.drop_p1_p3),
     })));
+    else setRecords([]);
     setLoading(false);
   }, [user, projectId]);
 

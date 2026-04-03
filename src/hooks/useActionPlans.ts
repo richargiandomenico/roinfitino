@@ -35,12 +35,14 @@ export function useActionPlans(projectId: string | null) {
   const [loading, setLoading] = useState(true);
 
   const fetchPlans = useCallback(async () => {
-    if (!user || !projectId) { setLoading(false); return; }
-    const { data } = await supabase
+    if (!user || !projectId) { setPlans([]); setSelectedPlanId(null); setLoading(false); return; }
+    setLoading(true);
+    const { data, error } = await supabase
       .from('action_plans')
       .select('*')
       .eq('project_id', projectId)
       .order('created_at', { ascending: false });
+    if (error) console.error('Error fetching action plans:', error);
     if (data) {
       const parsed: ActionPlan[] = data.map(d => ({
         ...d,
@@ -51,10 +53,13 @@ export function useActionPlans(projectId: string | null) {
         checklist_subtasks: (d.checklist_subtasks || {}) as unknown as Record<string, ChecklistSubtask[]>,
       }));
       setPlans(parsed);
-      if (!selectedPlanId && parsed.length > 0) setSelectedPlanId(parsed[0].id);
+      setSelectedPlanId(parsed.length > 0 ? parsed[0].id : null);
+    } else {
+      setPlans([]);
+      setSelectedPlanId(null);
     }
     setLoading(false);
-  }, [user, projectId, selectedPlanId]);
+  }, [user, projectId]);
 
   useEffect(() => { fetchPlans(); }, [fetchPlans]);
 

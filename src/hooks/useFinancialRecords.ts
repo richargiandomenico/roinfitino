@@ -67,10 +67,12 @@ export function useFinancialRecords(projectId: string | null) {
 
   const fetchRecords = useCallback(async () => {
     if (!user || !projectId) { setRecords([]); setLoading(false); return; }
-    const { data } = await (supabase.from('financial_records') as any).select('*')
+    setLoading(true);
+    const { data, error } = await (supabase.from('financial_records') as any).select('*')
       .eq('project_id', projectId)
       .order('record_date', { ascending: false });
-    if (data) setRecords(data.map(mapRow));
+    if (error) console.error('Error fetching financial records:', error);
+    setRecords(data ? data.map(mapRow) : []);
     setLoading(false);
   }, [user, projectId]);
 
