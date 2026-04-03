@@ -405,15 +405,38 @@ export function FinancialManager({ projectId, projectName }: Props) {
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-xs text-muted-foreground">Investimento (R$)</label>
                 <Input type="number" value={editInvestment} onChange={e => setEditInvestment(e.target.value)} />
               </div>
               <div>
-                <label className="text-xs text-muted-foreground">Receita BRL (R$)</label>
-                <Input type="number" value={editRevenueBrl} onChange={e => setEditRevenueBrl(e.target.value)} />
+                <label className="text-xs text-muted-foreground">Moeda da Receita</label>
+                <Select value={editCurrency} onValueChange={v => setEditCurrency(v as 'BRL' | 'USD' | 'EUR')}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="BRL">BRL (Real)</SelectItem>
+                    <SelectItem value="USD">USD (Dólar)</SelectItem>
+                    <SelectItem value="EUR">EUR (Euro)</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              {editCurrency === 'BRL' ? (
+                <div>
+                  <label className="text-xs text-muted-foreground">Receita (R$)</label>
+                  <Input type="number" value={editRevenueBrl} onChange={e => setEditRevenueBrl(e.target.value)} />
+                </div>
+              ) : (
+                <div>
+                  <label className="text-xs text-muted-foreground">Receita ({editCurrency})</label>
+                  <Input type="number" value={editRevenueForeign} onChange={e => setEditRevenueForeign(e.target.value)} placeholder={`Valor em ${editCurrency}`} />
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    ≈ R$ {((parseFloat(editRevenueForeign) || 0) * (editCurrency === 'EUR' ? effectiveEuro : effectiveDollar)).toFixed(2)}
+                  </p>
+                </div>
+              )}
               <div>
                 <label className="text-xs text-muted-foreground">Outros Custos (R$)</label>
                 <Input type="number" value={editOtherCosts} onChange={e => setEditOtherCosts(e.target.value)} />
