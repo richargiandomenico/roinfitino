@@ -39,7 +39,7 @@ const Index = () => {
   const { user, loading: authLoading } = useAuth();
   const { settings, effectiveDollar, effectiveEuro, autoRate, autoEuroRate, saveSettings } = useSettings();
   const { projects, selectedProjectId, setSelectedProjectId } = useProjects();
-  const { member } = useCurrentMember();
+  const { member, isAdmin } = useCurrentMember();
   const { tasks } = useTasks();
   const [calendarDate, setCalendarDate] = useState<Date | undefined>(new Date());
 
@@ -102,7 +102,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <TeamNav projects={projects} selectedProjectId={selectedProjectId} onSelectProject={setSelectedProjectId}>
-        <SettingsDialog settings={settings} effectiveDollar={effectiveDollar} effectiveEuro={effectiveEuro} autoRate={autoRate} autoEuroRate={autoEuroRate} onSave={saveSettings} />
+        {isAdmin && <SettingsDialog settings={settings} effectiveDollar={effectiveDollar} effectiveEuro={effectiveEuro} autoRate={autoRate} autoEuroRate={autoEuroRate} onSave={saveSettings} />}
       </TeamNav>
 
       <main className="container max-w-6xl mx-auto px-4 py-6 space-y-6">

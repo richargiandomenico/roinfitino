@@ -1,11 +1,13 @@
 import { useAuth } from '@/hooks/useAuth';
 import { useSettings } from '@/hooks/useSettings';
 import { useProjects } from '@/hooks/useProjects';
+import { useCurrentMember } from '@/hooks/useCurrentMember';
 import { useSimulations } from '@/hooks/useSimulations';
 import { useFunnelRecords } from '@/hooks/useFunnelRecords';
 import { AuthPage } from '@/components/AuthPage';
 import { SettingsDialog } from '@/components/SettingsDialog';
 import { ProjectSelector } from '@/components/ProjectSelector';
+import { ProjectMembersManager } from '@/components/ProjectMembersManager';
 import { RoiCalculator } from '@/components/RoiCalculator';
 import { FunnelAnalysis } from '@/components/FunnelAnalysis';
 import { ActionPlanManager } from '@/components/ActionPlanManager';
@@ -16,6 +18,7 @@ import { BarChart3, Navigation, ClipboardList, DollarSign } from 'lucide-react';
 
 export default function Projects() {
   const { user, loading: authLoading } = useAuth();
+  const { isAdmin } = useCurrentMember();
   const { settings, effectiveDollar, effectiveEuro, autoRate, autoEuroRate, saveSettings } = useSettings();
   const { projects, selectedProjectId, setSelectedProjectId, addProject, deleteProject } = useProjects();
   const { simulations, addSimulation, deleteSimulation } = useSimulations(selectedProjectId);
@@ -34,7 +37,7 @@ export default function Projects() {
   return (
     <div className="min-h-screen bg-background">
       <TeamNav projects={projects} selectedProjectId={selectedProjectId} onSelectProject={setSelectedProjectId}>
-        <SettingsDialog settings={settings} effectiveDollar={effectiveDollar} effectiveEuro={effectiveEuro} autoRate={autoRate} autoEuroRate={autoEuroRate} onSave={saveSettings} />
+        {isAdmin && <SettingsDialog settings={settings} effectiveDollar={effectiveDollar} effectiveEuro={effectiveEuro} autoRate={autoRate} autoEuroRate={autoEuroRate} onSave={saveSettings} />}
       </TeamNav>
 
       <main className="container max-w-6xl mx-auto px-4 py-6 space-y-6">
@@ -56,6 +59,8 @@ export default function Projects() {
             <p className="text-muted-foreground">Crie um projeto para começar a analisar seus ROIs.</p>
           </div>
         ) : (
+          <>
+            <ProjectMembersManager projectId={selectedProjectId} />
           <Tabs defaultValue="plan" className="animate-fade-in">
             <TabsList className="w-full grid grid-cols-4">
               <TabsTrigger value="plan" className="flex items-center gap-2">
@@ -100,6 +105,7 @@ export default function Projects() {
               />
             </TabsContent>
           </Tabs>
+          </>
         )}
       </main>
     </div>
