@@ -23,7 +23,7 @@ const DEFAULTS: Settings = {
 
 export function useSettings() {
   const { user } = useAuth();
-  const { rate: autoRate, loading: rateLoading } = useDollarRate();
+  const { rate: autoRate, euroRate: autoEuroRate, loading: rateLoading } = useDollarRate();
   const [settings, setSettings] = useState<Settings>(DEFAULTS);
   const [loading, setLoading] = useState(true);
 
