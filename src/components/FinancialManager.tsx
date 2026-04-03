@@ -136,8 +136,23 @@ export function FinancialManager({ projectId, projectName }: Props) {
               <Input type="number" placeholder="0,00" value={investment} onChange={e => setInvestment(e.target.value)} />
             </div>
             <div>
-              <label className="text-xs text-muted-foreground">Receita Bruta (R$)</label>
-              <Input type="number" placeholder="0,00" value={revenue} onChange={e => setRevenue(e.target.value)} />
+              <label className="text-xs text-muted-foreground">Receita Bruta</label>
+              <div className="flex gap-1">
+                <Select value={revenueCurrency} onValueChange={v => setRevenueCurrency(v as 'USD' | 'EUR')}>
+                  <SelectTrigger className="w-20 shrink-0"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="USD">USD</SelectItem>
+                    <SelectItem value="EUR">EUR</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Input type="number" placeholder="0.00" value={revenue} onChange={e => setRevenue(e.target.value)} />
+              </div>
+              {revenue && !isNaN(parseFloat(revenue)) && (
+                <p className="text-[10px] text-muted-foreground mt-0.5">
+                  ≈ {brl(parseFloat(revenue) * (revenueCurrency === 'EUR' ? euroRate : dollarRate))}
+                  <span className="ml-1">({revenueCurrency === 'EUR' ? `€1 = R$${euroRate.toFixed(4)}` : `$1 = R$${dollarRate.toFixed(4)}`})</span>
+                </p>
+              )}
             </div>
             <div>
               <label className="text-xs text-muted-foreground">Outros Custos (R$)</label>
