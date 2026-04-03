@@ -106,11 +106,37 @@ export function useFinancialRecords(projectId: string | null) {
     return { netRevenue, netProfit, roi };
   };
 
+  const updateRecord = async (id: string, input: FinancialInput) => {
+    if (!user) return;
+    const adxFee = input.revenue_brl * (input.adx_fee_pct / 100);
+    const netRevenue = input.revenue_brl - adxFee;
+    const taxAmount = netRevenue * (input.tax_pct / 100);
+    const netProfit = netRevenue - taxAmount - input.other_costs - input.investment;
+    const roi = input.investment > 0 ? (netProfit / input.investment) * 100 : 0;
+
+    const { data: updated, error } = await (supabase.from('financial_records') as any).update({
+      record_date: input.record_date,
+      investment: input.investment,
+      revenue_brl: input.revenue_brl,
+      adx_fee: adxFee,
+      tax_amount: taxAmount,
+      other_costs: input.other_costs,
+      net_revenue: netRevenue,
+      net_profit: netProfit,
+      roi,
+      observation: input.observation,
+      category: input.category,
+    }).eq('id', id).select().single();
+
+    if (updated && !error) {
+      setRecords(prev => prev.map(r => r.id === id ? mapRow(updated) : r));
+    }
+  };
+
   const deleteRecord = async (id: string) => {
     await (supabase.from('financial_records') as any).delete().eq('id', id);
     setRecords(prev => prev.filter(r => r.id !== id));
   };
-
   const getMonthlySummaries = useCallback((): MonthlySummary[] => {
     const byMonth: Record<string, FinancialRecord[]> = {};
     records.forEach(r => {
