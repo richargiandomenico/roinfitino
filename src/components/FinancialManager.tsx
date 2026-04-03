@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useFinancialRecords, FinancialInput, MonthlySummary } from '@/hooks/useFinancialRecords';
 import { useSettings } from '@/hooks/useSettings';
-import { useDollarRate } from '@/hooks/useDollarRate';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,8 +31,7 @@ function roiColor(v: number) { return v >= 50 ? 'text-profit' : v >= 0 ? 'text-w
 function roiBg(v: number) { return v >= 50 ? 'bg-profit/10 border-profit/30' : v >= 0 ? 'bg-warning/10 border-warning/30' : 'bg-loss/10 border-loss/30'; }
 
 export function FinancialManager({ projectId, projectName }: Props) {
-  const { settings } = useSettings();
-  const { rate: dollarRate, euroRate } = useDollarRate();
+  const { settings, effectiveDollar, effectiveEuro } = useSettings();
   const { records, loading, addRecord, deleteRecord, getMonthlySummaries } = useFinancialRecords(projectId);
 
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
@@ -71,7 +69,7 @@ export function FinancialManager({ projectId, projectName }: Props) {
     const inv = parseFloat(investment);
     const revRaw = parseFloat(revenue);
     if (isNaN(inv) || isNaN(revRaw)) return;
-    const conversionRate = revenueCurrency === 'EUR' ? euroRate : dollarRate;
+    const conversionRate = revenueCurrency === 'EUR' ? effectiveEuro : effectiveDollar;
     const revBrl = revRaw * conversionRate;
     await addRecord({
       record_date: date,
@@ -149,8 +147,8 @@ export function FinancialManager({ projectId, projectName }: Props) {
               </div>
               {revenue && !isNaN(parseFloat(revenue)) && (
                 <p className="text-[10px] text-muted-foreground mt-0.5">
-                  ≈ {brl(parseFloat(revenue) * (revenueCurrency === 'EUR' ? euroRate : dollarRate))}
-                  <span className="ml-1">({revenueCurrency === 'EUR' ? `€1 = R$${euroRate.toFixed(4)}` : `$1 = R$${dollarRate.toFixed(4)}`})</span>
+                  ≈ {brl(parseFloat(revenue) * (revenueCurrency === 'EUR' ? effectiveEuro : effectiveDollar))}
+                  <span className="ml-1">({revenueCurrency === 'EUR' ? `€1 = R$${effectiveEuro.toFixed(4)}` : `$1 = R$${effectiveDollar.toFixed(4)}`})</span>
                 </p>
               )}
             </div>

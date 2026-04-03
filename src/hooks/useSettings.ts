@@ -5,6 +5,7 @@ import { useDollarRate } from './useDollarRate';
 
 export interface Settings {
   dollar_rate: number;
+  euro_rate: number;
   use_auto_dollar: boolean;
   meta_fee: number;
   adx_fee: number;
@@ -13,6 +14,7 @@ export interface Settings {
 
 const DEFAULTS: Settings = {
   dollar_rate: 5.50,
+  euro_rate: 6.10,
   use_auto_dollar: true,
   meta_fee: 0,
   adx_fee: 10,
@@ -21,7 +23,7 @@ const DEFAULTS: Settings = {
 
 export function useSettings() {
   const { user } = useAuth();
-  const { rate: autoRate, loading: rateLoading } = useDollarRate();
+  const { rate: autoRate, euroRate: autoEuroRate, loading: rateLoading } = useDollarRate();
   const [settings, setSettings] = useState<Settings>(DEFAULTS);
   const [loading, setLoading] = useState(true);
 
@@ -32,6 +34,7 @@ export function useSettings() {
         if (data) {
           setSettings({
             dollar_rate: Number(data.dollar_rate),
+            euro_rate: Number(data.euro_rate ?? 6.10),
             use_auto_dollar: data.use_auto_dollar ?? true,
             meta_fee: Number(data.meta_fee),
             adx_fee: Number(data.adx_fee),
@@ -43,6 +46,7 @@ export function useSettings() {
   }, [user]);
 
   const effectiveDollar = settings.use_auto_dollar ? autoRate : settings.dollar_rate;
+  const effectiveEuro = settings.use_auto_dollar ? autoEuroRate : settings.euro_rate;
 
   const saveSettings = useCallback(async (newSettings: Settings) => {
     if (!user) return;
@@ -54,5 +58,5 @@ export function useSettings() {
     if (error) console.error('Error saving settings:', error);
   }, [user]);
 
-  return { settings, effectiveDollar, autoRate, loading: loading || rateLoading, saveSettings };
+  return { settings, effectiveDollar, effectiveEuro, autoRate, autoEuroRate, loading: loading || rateLoading, saveSettings };
 }

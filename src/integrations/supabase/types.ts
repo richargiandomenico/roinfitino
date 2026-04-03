@@ -279,6 +279,7 @@ export type Database = {
           adx_fee: number | null
           created_at: string
           dollar_rate: number | null
+          euro_rate: number | null
           id: string
           meta_fee: number | null
           tax_rate: number | null
@@ -290,6 +291,7 @@ export type Database = {
           adx_fee?: number | null
           created_at?: string
           dollar_rate?: number | null
+          euro_rate?: number | null
           id?: string
           meta_fee?: number | null
           tax_rate?: number | null
@@ -301,6 +303,7 @@ export type Database = {
           adx_fee?: number | null
           created_at?: string
           dollar_rate?: number | null
+          euro_rate?: number | null
           id?: string
           meta_fee?: number | null
           tax_rate?: number | null

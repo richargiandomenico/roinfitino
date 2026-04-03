@@ -16,7 +16,7 @@ import { BarChart3, Navigation, ClipboardList, DollarSign } from 'lucide-react';
 
 export default function Projects() {
   const { user, loading: authLoading } = useAuth();
-  const { settings, effectiveDollar, autoRate, saveSettings } = useSettings();
+  const { settings, effectiveDollar, effectiveEuro, autoRate, autoEuroRate, saveSettings } = useSettings();
   const { projects, selectedProjectId, setSelectedProjectId, addProject, deleteProject } = useProjects();
   const { simulations, addSimulation, deleteSimulation } = useSimulations(selectedProjectId);
   const { records: funnelRecords, addRecord: addFunnel, deleteRecord: deleteFunnel } = useFunnelRecords(selectedProjectId);
@@ -34,7 +34,7 @@ export default function Projects() {
   return (
     <div className="min-h-screen bg-background">
       <TeamNav projects={projects} selectedProjectId={selectedProjectId} onSelectProject={setSelectedProjectId}>
-        <SettingsDialog settings={settings} effectiveDollar={effectiveDollar} autoRate={autoRate} onSave={saveSettings} />
+        <SettingsDialog settings={settings} effectiveDollar={effectiveDollar} effectiveEuro={effectiveEuro} autoRate={autoRate} autoEuroRate={autoEuroRate} onSave={saveSettings} />
       </TeamNav>
 
       <main className="container max-w-6xl mx-auto px-4 py-6 space-y-6">
