@@ -159,5 +159,5 @@ export function useFinancialRecords(projectId: string | null) {
       });
   }, [records]);
 
-  return { records, loading, addRecord, deleteRecord, getMonthlySummaries };
+  return { records, loading, addRecord, updateRecord, deleteRecord, getMonthlySummaries };
 }
