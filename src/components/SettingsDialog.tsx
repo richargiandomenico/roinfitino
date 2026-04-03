@@ -57,19 +57,28 @@ export function SettingsDialog({ settings, effectiveDollar, effectiveEuro, autoR
               />
             </div>
             <p className="text-xs text-muted-foreground mb-2">
-              Cotação atual: R$ {autoRate.toFixed(4)}
+              Cotação USD atual: R$ {autoRate.toFixed(4)} | EUR: R$ {autoEuroRate.toFixed(4)}
             </p>
             {!local.use_auto_dollar && (
-              <div>
-                <Label className="text-xs">Dólar manual (R$)</Label>
-                <Input
-                  type="number" step="0.01" value={local.dollar_rate}
-                  onChange={e => setLocal({ ...local, dollar_rate: parseFloat(e.target.value) || 0 })}
-                />
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label className="text-xs">Dólar manual (R$)</Label>
+                  <Input
+                    type="number" step="0.01" value={local.dollar_rate}
+                    onChange={e => setLocal({ ...local, dollar_rate: parseFloat(e.target.value) || 0 })}
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs">Euro manual (R$)</Label>
+                  <Input
+                    type="number" step="0.01" value={local.euro_rate}
+                    onChange={e => setLocal({ ...local, euro_rate: parseFloat(e.target.value) || 0 })}
+                  />
+                </div>
               </div>
             )}
             <p className="text-xs mt-2 font-medium">
-              Usando: <span className="text-profit font-mono">R$ {effectiveDollar.toFixed(4)}</span>
+              Usando: <span className="text-profit font-mono">USD R$ {effectiveDollar.toFixed(4)}</span> | <span className="text-profit font-mono">EUR R$ {effectiveEuro.toFixed(4)}</span>
             </p>
           </div>
 
