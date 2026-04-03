@@ -1,12 +1,14 @@
 import { useState, useMemo } from 'react';
-import { useFinancialRecords, FinancialInput, MonthlySummary } from '@/hooks/useFinancialRecords';
+import { useFinancialRecords, FinancialInput, FinancialRecord } from '@/hooks/useFinancialRecords';
 import { useSettings } from '@/hooks/useSettings';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Trash2, TrendingUp, TrendingDown, DollarSign, Calendar, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Trash2, TrendingUp, TrendingDown, DollarSign, Calendar, ArrowUpRight, ArrowDownRight, Pencil } from 'lucide-react';
 
 interface Props {
   projectId: string;
@@ -32,7 +34,7 @@ function roiBg(v: number) { return v >= 50 ? 'bg-profit/10 border-profit/30' : v
 
 export function FinancialManager({ projectId, projectName }: Props) {
   const { settings, effectiveDollar, effectiveEuro } = useSettings();
-  const { records, loading, addRecord, deleteRecord, getMonthlySummaries } = useFinancialRecords(projectId);
+  const { records, loading, addRecord, updateRecord, deleteRecord, getMonthlySummaries } = useFinancialRecords(projectId);
 
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [investment, setInvestment] = useState('');
@@ -42,6 +44,15 @@ export function FinancialManager({ projectId, projectName }: Props) {
   const [observation, setObservation] = useState('');
   const [category, setCategory] = useState('trafego');
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
+
+  // Edit state
+  const [editRecord, setEditRecord] = useState<FinancialRecord | null>(null);
+  const [editDate, setEditDate] = useState('');
+  const [editInvestment, setEditInvestment] = useState('');
+  const [editRevenueBrl, setEditRevenueBrl] = useState('');
+  const [editOtherCosts, setEditOtherCosts] = useState('');
+  const [editObservation, setEditObservation] = useState('');
+  const [editCategory, setEditCategory] = useState('trafego');
 
   const monthlySummaries = useMemo(() => getMonthlySummaries(), [getMonthlySummaries]);
   const availableMonths = useMemo(() => monthlySummaries.map(s => s.month), [monthlySummaries]);
@@ -82,6 +93,34 @@ export function FinancialManager({ projectId, projectName }: Props) {
       category,
     });
     setInvestment(''); setRevenue(''); setOtherCosts(''); setObservation('');
+  };
+
+  const openEdit = (r: FinancialRecord) => {
+    setEditRecord(r);
+    setEditDate(r.record_date);
+    setEditInvestment(String(r.investment));
+    setEditRevenueBrl(String(r.revenue_brl));
+    setEditOtherCosts(String(r.other_costs));
+    setEditObservation(r.observation);
+    setEditCategory(r.category);
+  };
+
+  const handleUpdate = async () => {
+    if (!editRecord) return;
+    const inv = parseFloat(editInvestment);
+    const revBrl = parseFloat(editRevenueBrl);
+    if (isNaN(inv) || isNaN(revBrl)) return;
+    await updateRecord(editRecord.id, {
+      record_date: editDate,
+      investment: inv,
+      revenue_brl: revBrl,
+      adx_fee_pct: settings.adx_fee,
+      tax_pct: settings.tax_rate,
+      other_costs: parseFloat(editOtherCosts) || 0,
+      observation: editObservation,
+      category: editCategory,
+    });
+    setEditRecord(null);
   };
 
   if (loading) return <div className="text-center py-10 text-muted-foreground">Carregando financeiro...</div>;
@@ -230,11 +269,29 @@ export function FinancialManager({ projectId, projectName }: Props) {
                       {r.roi >= 0 ? <ArrowUpRight className="inline w-3 h-3" /> : <ArrowDownRight className="inline w-3 h-3" />}
                       {pct(r.roi)}
                     </td>
-                    <td className="px-3 py-2 max-w-[150px] truncate">{r.observation}</td>
+                    <td className="px-3 py-2 max-w-[250px]">
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="block truncate cursor-help">{r.observation || '—'}</span>
+                          </TooltipTrigger>
+                          {r.observation && (
+                            <TooltipContent side="top" className="max-w-sm whitespace-pre-wrap text-xs">
+                              {r.observation}
+                            </TooltipContent>
+                          )}
+                        </Tooltip>
+                      </TooltipProvider>
+                    </td>
                     <td className="px-3 py-2">
-                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => deleteRecord(r.id)}>
-                        <Trash2 className="w-3 h-3 text-loss" />
-                      </Button>
+                      <div className="flex gap-1">
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => openEdit(r)}>
+                          <Pencil className="w-3 h-3 text-muted-foreground" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => deleteRecord(r.id)}>
+                          <Trash2 className="w-3 h-3 text-loss" />
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -301,6 +358,58 @@ export function FinancialManager({ projectId, projectName }: Props) {
           ))}
         </TabsContent>
       </Tabs>
+
+      {/* Edit Dialog */}
+      <Dialog open={!!editRecord} onOpenChange={open => { if (!open) setEditRecord(null); }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><Pencil className="w-4 h-4" /> Editar Registro</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs text-muted-foreground">Data</label>
+                <Input type="date" value={editDate} onChange={e => setEditDate(e.target.value)} />
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground">Categoria</label>
+                <Select value={editCategory} onValueChange={setEditCategory}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {CATEGORIES.map(c => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <label className="text-xs text-muted-foreground">Investimento (R$)</label>
+                <Input type="number" value={editInvestment} onChange={e => setEditInvestment(e.target.value)} />
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground">Receita BRL (R$)</label>
+                <Input type="number" value={editRevenueBrl} onChange={e => setEditRevenueBrl(e.target.value)} />
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground">Outros Custos (R$)</label>
+                <Input type="number" value={editOtherCosts} onChange={e => setEditOtherCosts(e.target.value)} />
+              </div>
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground">Observação</label>
+              <Input value={editObservation} onChange={e => setEditObservation(e.target.value)} placeholder="Observação..." />
+            </div>
+            <div className="flex items-center gap-3 text-xs text-muted-foreground">
+              <span>Taxa ADX: <strong>{settings.adx_fee}%</strong></span>
+              <span>Imposto: <strong>{settings.tax_rate}%</strong></span>
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setEditRecord(null)}>Cancelar</Button>
+              <Button onClick={handleUpdate}>Salvar</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
