@@ -50,6 +50,8 @@ export function FinancialManager({ projectId, projectName }: Props) {
   const [editDate, setEditDate] = useState('');
   const [editInvestment, setEditInvestment] = useState('');
   const [editRevenueBrl, setEditRevenueBrl] = useState('');
+  const [editRevenueForeign, setEditRevenueForeign] = useState('');
+  const [editCurrency, setEditCurrency] = useState<'BRL' | 'USD' | 'EUR'>('BRL');
   const [editOtherCosts, setEditOtherCosts] = useState('');
   const [editObservation, setEditObservation] = useState('');
   const [editCategory, setEditCategory] = useState('trafego');
