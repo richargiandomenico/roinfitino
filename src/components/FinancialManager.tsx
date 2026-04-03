@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useFinancialRecords, FinancialInput, MonthlySummary } from '@/hooks/useFinancialRecords';
 import { useSettings } from '@/hooks/useSettings';
+import { useDollarRate } from '@/hooks/useDollarRate';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
