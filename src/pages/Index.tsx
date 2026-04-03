@@ -102,7 +102,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <TeamNav projects={projects} selectedProjectId={selectedProjectId} onSelectProject={setSelectedProjectId}>
-        {member && (member as any) && <SettingsDialogWrapper />}
+        {isAdmin && <SettingsDialog settings={settings} effectiveDollar={effectiveDollar} effectiveEuro={effectiveEuro} autoRate={autoRate} autoEuroRate={autoEuroRate} onSave={saveSettings} />}
       </TeamNav>
 
       <main className="container max-w-6xl mx-auto px-4 py-6 space-y-6">
