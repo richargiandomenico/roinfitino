@@ -17,6 +17,7 @@ import { BarChart3, Navigation, ClipboardList, DollarSign } from 'lucide-react';
 
 export default function Projects() {
   const { user, loading: authLoading } = useAuth();
+  const { isAdmin } = useCurrentMember();
   const { settings, effectiveDollar, effectiveEuro, autoRate, autoEuroRate, saveSettings } = useSettings();
   const { projects, selectedProjectId, setSelectedProjectId, addProject, deleteProject } = useProjects();
   const { simulations, addSimulation, deleteSimulation } = useSimulations(selectedProjectId);
