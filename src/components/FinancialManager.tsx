@@ -69,7 +69,7 @@ export function FinancialManager({ projectId, projectName }: Props) {
     const inv = parseFloat(investment);
     const revRaw = parseFloat(revenue);
     if (isNaN(inv) || isNaN(revRaw)) return;
-    const conversionRate = revenueCurrency === 'EUR' ? euroRate : dollarRate;
+    const conversionRate = revenueCurrency === 'EUR' ? effectiveEuro : effectiveDollar;
     const revBrl = revRaw * conversionRate;
     await addRecord({
       record_date: date,
