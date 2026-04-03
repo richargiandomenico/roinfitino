@@ -69,16 +69,18 @@ export function FinancialManager({ projectId, projectName }: Props) {
 
   const handleAdd = async () => {
     const inv = parseFloat(investment);
-    const rev = parseFloat(revenue);
-    if (isNaN(inv) || isNaN(rev)) return;
+    const revRaw = parseFloat(revenue);
+    if (isNaN(inv) || isNaN(revRaw)) return;
+    const conversionRate = revenueCurrency === 'EUR' ? euroRate : dollarRate;
+    const revBrl = revRaw * conversionRate;
     await addRecord({
       record_date: date,
       investment: inv,
-      revenue_brl: rev,
+      revenue_brl: revBrl,
       adx_fee_pct: settings.adx_fee,
       tax_pct: settings.tax_rate,
       other_costs: parseFloat(otherCosts) || 0,
-      observation,
+      observation: `[${revenueCurrency} ${revRaw.toFixed(2)} @ ${conversionRate.toFixed(4)}] ${observation}`.trim(),
       category,
     });
     setInvestment(''); setRevenue(''); setOtherCosts(''); setObservation('');
