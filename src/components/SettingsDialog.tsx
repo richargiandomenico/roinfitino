@@ -16,7 +16,7 @@ interface Props {
   onSave: (s: Settings) => Promise<void>;
 }
 
-export function SettingsDialog({ settings, effectiveDollar, autoRate, onSave }: Props) {
+export function SettingsDialog({ settings, effectiveDollar, effectiveEuro, autoRate, autoEuroRate, onSave }: Props) {
   const [open, setOpen] = useState(false);
   const [local, setLocal] = useState(settings);
 
