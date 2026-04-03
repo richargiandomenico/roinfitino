@@ -58,5 +58,5 @@ export function useSettings() {
     if (error) console.error('Error saving settings:', error);
   }, [user]);
 
-  return { settings, effectiveDollar, autoRate, loading: loading || rateLoading, saveSettings };
+  return { settings, effectiveDollar, effectiveEuro, autoRate, autoEuroRate, loading: loading || rateLoading, saveSettings };
 }
