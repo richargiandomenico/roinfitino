@@ -105,6 +105,7 @@ export default function Projects() {
               />
             </TabsContent>
           </Tabs>
+          </>
         )}
       </main>
     </div>
