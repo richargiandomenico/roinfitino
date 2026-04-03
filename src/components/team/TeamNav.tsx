@@ -28,10 +28,8 @@ export function TeamNav({ children, projects, selectedProjectId, onSelectProject
       <div className="container max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-6">
           <Link to="/" className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg gradient-profit flex items-center justify-center">
-              <span className="text-profit-foreground font-bold text-sm">R</span>
-            </div>
-            <h1 className="text-lg font-bold font-display hidden sm:block">ROI Analyzer</h1>
+            <img src="/logo.png" alt="ROI Infinito" className="w-8 h-8 object-contain" />
+            <h1 className="text-lg font-bold font-display hidden sm:block">ROI Infinito</h1>
           </Link>
           <nav className="flex items-center gap-1">
             {links.map(({ to, label, icon: Icon }) => (
