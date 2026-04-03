@@ -33,11 +33,13 @@ function roiBg(v: number) { return v >= 50 ? 'bg-profit/10 border-profit/30' : v
 
 export function FinancialManager({ projectId, projectName }: Props) {
   const { settings } = useSettings();
+  const { rate: dollarRate, euroRate } = useDollarRate();
   const { records, loading, addRecord, deleteRecord, getMonthlySummaries } = useFinancialRecords(projectId);
 
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [investment, setInvestment] = useState('');
   const [revenue, setRevenue] = useState('');
+  const [revenueCurrency, setRevenueCurrency] = useState<'USD' | 'EUR'>('USD');
   const [otherCosts, setOtherCosts] = useState('');
   const [observation, setObservation] = useState('');
   const [category, setCategory] = useState('trafego');
