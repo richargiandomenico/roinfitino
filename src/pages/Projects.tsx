@@ -9,9 +9,10 @@ import { ProjectSelector } from '@/components/ProjectSelector';
 import { RoiCalculator } from '@/components/RoiCalculator';
 import { FunnelAnalysis } from '@/components/FunnelAnalysis';
 import { ActionPlanManager } from '@/components/ActionPlanManager';
+import { FinancialManager } from '@/components/FinancialManager';
 import { TeamNav } from '@/components/team/TeamNav';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BarChart3, Navigation, ClipboardList } from 'lucide-react';
+import { BarChart3, Navigation, ClipboardList, DollarSign } from 'lucide-react';
 
 export default function Projects() {
   const { user, loading: authLoading } = useAuth();
