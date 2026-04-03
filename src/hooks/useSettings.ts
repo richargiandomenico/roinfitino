@@ -46,6 +46,7 @@ export function useSettings() {
   }, [user]);
 
   const effectiveDollar = settings.use_auto_dollar ? autoRate : settings.dollar_rate;
+  const effectiveEuro = settings.use_auto_dollar ? autoEuroRate : settings.euro_rate;
 
   const saveSettings = useCallback(async (newSettings: Settings) => {
     if (!user) return;
