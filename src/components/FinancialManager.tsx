@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useFinancialRecords, FinancialInput, MonthlySummary } from '@/hooks/useFinancialRecords';
 import { useSettings } from '@/hooks/useSettings';
+import { useDollarRate } from '@/hooks/useDollarRate';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,11 +33,13 @@ function roiBg(v: number) { return v >= 50 ? 'bg-profit/10 border-profit/30' : v
 
 export function FinancialManager({ projectId, projectName }: Props) {
   const { settings } = useSettings();
+  const { rate: dollarRate, euroRate } = useDollarRate();
   const { records, loading, addRecord, deleteRecord, getMonthlySummaries } = useFinancialRecords(projectId);
 
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [investment, setInvestment] = useState('');
   const [revenue, setRevenue] = useState('');
+  const [revenueCurrency, setRevenueCurrency] = useState<'USD' | 'EUR'>('USD');
   const [otherCosts, setOtherCosts] = useState('');
   const [observation, setObservation] = useState('');
   const [category, setCategory] = useState('trafego');
@@ -66,16 +69,18 @@ export function FinancialManager({ projectId, projectName }: Props) {
 
   const handleAdd = async () => {
     const inv = parseFloat(investment);
-    const rev = parseFloat(revenue);
-    if (isNaN(inv) || isNaN(rev)) return;
+    const revRaw = parseFloat(revenue);
+    if (isNaN(inv) || isNaN(revRaw)) return;
+    const conversionRate = revenueCurrency === 'EUR' ? euroRate : dollarRate;
+    const revBrl = revRaw * conversionRate;
     await addRecord({
       record_date: date,
       investment: inv,
-      revenue_brl: rev,
+      revenue_brl: revBrl,
       adx_fee_pct: settings.adx_fee,
       tax_pct: settings.tax_rate,
       other_costs: parseFloat(otherCosts) || 0,
-      observation,
+      observation: `[${revenueCurrency} ${revRaw.toFixed(2)} @ ${conversionRate.toFixed(4)}] ${observation}`.trim(),
       category,
     });
     setInvestment(''); setRevenue(''); setOtherCosts(''); setObservation('');
@@ -131,8 +136,23 @@ export function FinancialManager({ projectId, projectName }: Props) {
               <Input type="number" placeholder="0,00" value={investment} onChange={e => setInvestment(e.target.value)} />
             </div>
             <div>
-              <label className="text-xs text-muted-foreground">Receita Bruta (R$)</label>
-              <Input type="number" placeholder="0,00" value={revenue} onChange={e => setRevenue(e.target.value)} />
+              <label className="text-xs text-muted-foreground">Receita Bruta</label>
+              <div className="flex gap-1">
+                <Select value={revenueCurrency} onValueChange={v => setRevenueCurrency(v as 'USD' | 'EUR')}>
+                  <SelectTrigger className="w-20 shrink-0"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="USD">USD</SelectItem>
+                    <SelectItem value="EUR">EUR</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Input type="number" placeholder="0.00" value={revenue} onChange={e => setRevenue(e.target.value)} />
+              </div>
+              {revenue && !isNaN(parseFloat(revenue)) && (
+                <p className="text-[10px] text-muted-foreground mt-0.5">
+                  ≈ {brl(parseFloat(revenue) * (revenueCurrency === 'EUR' ? euroRate : dollarRate))}
+                  <span className="ml-1">({revenueCurrency === 'EUR' ? `€1 = R$${euroRate.toFixed(4)}` : `$1 = R$${dollarRate.toFixed(4)}`})</span>
+                </p>
+              )}
             </div>
             <div>
               <label className="text-xs text-muted-foreground">Outros Custos (R$)</label>
