@@ -85,6 +85,68 @@ export type Database = {
           },
         ]
       }
+      financial_records: {
+        Row: {
+          adx_fee: number
+          category: string
+          created_at: string
+          id: string
+          investment: number
+          net_profit: number
+          net_revenue: number
+          observation: string | null
+          other_costs: number
+          project_id: string | null
+          record_date: string
+          revenue_brl: number
+          roi: number
+          tax_amount: number
+          user_id: string
+        }
+        Insert: {
+          adx_fee?: number
+          category?: string
+          created_at?: string
+          id?: string
+          investment?: number
+          net_profit?: number
+          net_revenue?: number
+          observation?: string | null
+          other_costs?: number
+          project_id?: string | null
+          record_date?: string
+          revenue_brl?: number
+          roi?: number
+          tax_amount?: number
+          user_id: string
+        }
+        Update: {
+          adx_fee?: number
+          category?: string
+          created_at?: string
+          id?: string
+          investment?: number
+          net_profit?: number
+          net_revenue?: number
+          observation?: string | null
+          other_costs?: number
+          project_id?: string | null
+          record_date?: string
+          revenue_brl?: number
+          roi?: number
+          tax_amount?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_records_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       funnel_records: {
         Row: {
           conv_p1_p2: number | null

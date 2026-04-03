@@ -9,9 +9,10 @@ import { ProjectSelector } from '@/components/ProjectSelector';
 import { RoiCalculator } from '@/components/RoiCalculator';
 import { FunnelAnalysis } from '@/components/FunnelAnalysis';
 import { ActionPlanManager } from '@/components/ActionPlanManager';
+import { FinancialManager } from '@/components/FinancialManager';
 import { TeamNav } from '@/components/team/TeamNav';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BarChart3, Navigation, ClipboardList } from 'lucide-react';
+import { BarChart3, Navigation, ClipboardList, DollarSign } from 'lucide-react';
 
 export default function Projects() {
   const { user, loading: authLoading } = useAuth();
@@ -56,15 +57,18 @@ export default function Projects() {
           </div>
         ) : (
           <Tabs defaultValue="roi" className="animate-fade-in">
-            <TabsList className="w-full grid grid-cols-3">
+            <TabsList className="w-full grid grid-cols-4">
               <TabsTrigger value="roi" className="flex items-center gap-2">
-                <BarChart3 className="w-4 h-4" /> Calculadora ROI
+                <BarChart3 className="w-4 h-4" /> ROI
+              </TabsTrigger>
+              <TabsTrigger value="financial" className="flex items-center gap-2">
+                <DollarSign className="w-4 h-4" /> Financeiro
               </TabsTrigger>
               <TabsTrigger value="funnel" className="flex items-center gap-2">
-                <Navigation className="w-4 h-4" /> Análise de Funil
+                <Navigation className="w-4 h-4" /> Funil
               </TabsTrigger>
               <TabsTrigger value="plan" className="flex items-center gap-2">
-                <ClipboardList className="w-4 h-4" /> Plano de Ação
+                <ClipboardList className="w-4 h-4" /> Plano
               </TabsTrigger>
             </TabsList>
             <TabsContent value="roi" className="mt-4">
@@ -73,6 +77,12 @@ export default function Projects() {
                 simulations={simulations}
                 onAdd={addSimulation}
                 onDelete={deleteSimulation}
+              />
+            </TabsContent>
+            <TabsContent value="financial" className="mt-4">
+              <FinancialManager
+                projectId={selectedProjectId!}
+                projectName={projects.find(p => p.id === selectedProjectId)?.name || ''}
               />
             </TabsContent>
             <TabsContent value="funnel" className="mt-4">
