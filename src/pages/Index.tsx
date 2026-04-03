@@ -39,7 +39,7 @@ const Index = () => {
   const { user, loading: authLoading } = useAuth();
   const { settings, effectiveDollar, effectiveEuro, autoRate, autoEuroRate, saveSettings } = useSettings();
   const { projects, selectedProjectId, setSelectedProjectId } = useProjects();
-  const { member } = useCurrentMember();
+  const { member, isAdmin } = useCurrentMember();
   const { tasks } = useTasks();
   const [calendarDate, setCalendarDate] = useState<Date | undefined>(new Date());
 
