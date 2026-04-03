@@ -23,9 +23,11 @@ export default function TeamMembers() {
   const isSuperAdmin = currentRole === 'super_admin';
 
   const handleRoleChange = async (userId: string, newRole: AppRole) => {
+    // Delete existing role then insert new one
+    await (supabase as any).from('user_roles').delete().eq('user_id', userId);
     const { error } = await (supabase as any)
       .from('user_roles')
-      .upsert({ user_id: userId, role: newRole }, { onConflict: 'user_id' });
+      .insert({ user_id: userId, role: newRole });
     if (error) {
       toast.error('Erro ao alterar cargo');
     } else {
