@@ -15,7 +15,15 @@ interface TeamNavProps {
 
 export function TeamNav({ children, projects, selectedProjectId, onSelectProject }: TeamNavProps) {
   const { signOut } = useAuth();
+  const { isAdmin } = useCurrentMember();
   const location = useLocation();
+
+  const links = [
+    { to: '/', label: 'Dashboard', icon: BarChart3 },
+    { to: '/projects', label: 'Projetos', icon: Globe },
+    { to: '/tasks', label: 'Tarefas', icon: CheckSquare },
+    ...(isAdmin ? [{ to: '/team', label: 'Equipe', icon: Users }] : []),
+  ];
 
   return (
     <header className="border-b bg-card sticky top-0 z-10">
