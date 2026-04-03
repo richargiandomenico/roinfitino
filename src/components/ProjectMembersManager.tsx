@@ -11,14 +11,18 @@ import { toast } from 'sonner';
 
 interface Props {
   projectId: string;
+  projectOwnerId?: string;
 }
 
-export function ProjectMembersManager({ projectId }: Props) {
+export function ProjectMembersManager({ projectId, projectOwnerId }: Props) {
   const { members } = useTeamMembers();
-  const { isAdmin } = useCurrentMember();
+  const { isAdmin, member: currentMember } = useCurrentMember();
   const [assignedIds, setAssignedIds] = useState<string[]>([]);
   const [selectedMember, setSelectedMember] = useState('');
   const [loading, setLoading] = useState(true);
+
+  const isOwner = currentMember?.user_id === projectOwnerId;
+  const canManageMembers = isAdmin || isOwner;
 
   const fetchAssigned = useCallback(async () => {
     const { data } = await (supabase as any)
