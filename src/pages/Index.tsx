@@ -37,7 +37,7 @@ const COMPANY_VALUES = [
 
 const Index = () => {
   const { user, loading: authLoading } = useAuth();
-  const { settings, effectiveDollar, autoRate, saveSettings } = useSettings();
+  const { settings, effectiveDollar, effectiveEuro, autoRate, autoEuroRate, saveSettings } = useSettings();
   const { projects, selectedProjectId, setSelectedProjectId } = useProjects();
   const { member } = useCurrentMember();
   const { tasks } = useTasks();
