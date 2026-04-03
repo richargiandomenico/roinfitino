@@ -7,6 +7,7 @@ import { useFunnelRecords } from '@/hooks/useFunnelRecords';
 import { AuthPage } from '@/components/AuthPage';
 import { SettingsDialog } from '@/components/SettingsDialog';
 import { ProjectSelector } from '@/components/ProjectSelector';
+import { ProjectMembersManager } from '@/components/ProjectMembersManager';
 import { RoiCalculator } from '@/components/RoiCalculator';
 import { FunnelAnalysis } from '@/components/FunnelAnalysis';
 import { ActionPlanManager } from '@/components/ActionPlanManager';
