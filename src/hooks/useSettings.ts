@@ -34,6 +34,7 @@ export function useSettings() {
         if (data) {
           setSettings({
             dollar_rate: Number(data.dollar_rate),
+            euro_rate: Number(data.euro_rate ?? 6.10),
             use_auto_dollar: data.use_auto_dollar ?? true,
             meta_fee: Number(data.meta_fee),
             adx_fee: Number(data.adx_fee),
