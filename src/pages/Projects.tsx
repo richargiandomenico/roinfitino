@@ -56,33 +56,34 @@ export default function Projects() {
             <p className="text-muted-foreground">Crie um projeto para começar a analisar seus ROIs.</p>
           </div>
         ) : (
-          <Tabs defaultValue="roi" className="animate-fade-in">
+          <Tabs defaultValue="plan" className="animate-fade-in">
             <TabsList className="w-full grid grid-cols-4">
+              <TabsTrigger value="plan" className="flex items-center gap-2">
+                <ClipboardList className="w-4 h-4" /> Plano
+              </TabsTrigger>
               <TabsTrigger value="roi" className="flex items-center gap-2">
                 <BarChart3 className="w-4 h-4" /> ROI
-              </TabsTrigger>
-              <TabsTrigger value="financial" className="flex items-center gap-2">
-                <DollarSign className="w-4 h-4" /> Financeiro
               </TabsTrigger>
               <TabsTrigger value="funnel" className="flex items-center gap-2">
                 <Navigation className="w-4 h-4" /> Funil
               </TabsTrigger>
-              <TabsTrigger value="plan" className="flex items-center gap-2">
-                <ClipboardList className="w-4 h-4" /> Plano
+              <TabsTrigger value="financial" className="flex items-center gap-2">
+                <DollarSign className="w-4 h-4" /> Financeiro
               </TabsTrigger>
             </TabsList>
+            <TabsContent value="plan" className="mt-4">
+              <ActionPlanManager
+                projectId={selectedProjectId!}
+                projectName={projects.find(p => p.id === selectedProjectId)?.name || ''}
+                projectNiche={projects.find(p => p.id === selectedProjectId)?.niche || null}
+              />
+            </TabsContent>
             <TabsContent value="roi" className="mt-4">
               <RoiCalculator
                 effectiveDollar={effectiveDollar}
                 simulations={simulations}
                 onAdd={addSimulation}
                 onDelete={deleteSimulation}
-              />
-            </TabsContent>
-            <TabsContent value="financial" className="mt-4">
-              <FinancialManager
-                projectId={selectedProjectId!}
-                projectName={projects.find(p => p.id === selectedProjectId)?.name || ''}
               />
             </TabsContent>
             <TabsContent value="funnel" className="mt-4">
@@ -92,11 +93,10 @@ export default function Projects() {
                 onDelete={deleteFunnel}
               />
             </TabsContent>
-            <TabsContent value="plan" className="mt-4">
-              <ActionPlanManager
+            <TabsContent value="financial" className="mt-4">
+              <FinancialManager
                 projectId={selectedProjectId!}
                 projectName={projects.find(p => p.id === selectedProjectId)?.name || ''}
-                projectNiche={projects.find(p => p.id === selectedProjectId)?.niche || null}
               />
             </TabsContent>
           </Tabs>
