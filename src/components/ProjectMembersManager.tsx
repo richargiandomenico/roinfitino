@@ -11,14 +11,18 @@ import { toast } from 'sonner';
 
 interface Props {
   projectId: string;
+  projectOwnerId?: string;
 }
 
-export function ProjectMembersManager({ projectId }: Props) {
+export function ProjectMembersManager({ projectId, projectOwnerId }: Props) {
   const { members } = useTeamMembers();
-  const { isAdmin } = useCurrentMember();
+  const { isAdmin, member: currentMember } = useCurrentMember();
   const [assignedIds, setAssignedIds] = useState<string[]>([]);
   const [selectedMember, setSelectedMember] = useState('');
   const [loading, setLoading] = useState(true);
+
+  const isOwner = currentMember?.user_id === projectOwnerId;
+  const canManageMembers = isAdmin || isOwner;
 
   const fetchAssigned = useCallback(async () => {
     const { data } = await (supabase as any)
@@ -83,7 +87,7 @@ export function ProjectMembersManager({ projectId }: Props) {
               </AvatarFallback>
             </Avatar>
             <span className="text-xs">{m.name}</span>
-            {isAdmin && (
+            {canManageMembers && (
               <button
                 onClick={() => handleRemove(m.id)}
                 className="ml-1 rounded-full p-0.5 hover:bg-destructive/20 transition-colors"
@@ -96,7 +100,7 @@ export function ProjectMembersManager({ projectId }: Props) {
       </div>
 
       {/* Add member (available to admins and project owner) */}
-      {availableMembers.length > 0 && (
+      {canManageMembers && availableMembers.length > 0 && (
         <div className="flex items-center gap-2">
           <Select value={selectedMember} onValueChange={setSelectedMember}>
             <SelectTrigger className="h-8 text-xs flex-1">

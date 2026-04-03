@@ -60,7 +60,7 @@ export default function Projects() {
           </div>
         ) : (
           <>
-            <ProjectMembersManager projectId={selectedProjectId} />
+            <ProjectMembersManager projectId={selectedProjectId} projectOwnerId={projects.find(p => p.id === selectedProjectId)?.user_id} />
           <Tabs defaultValue="plan" className="animate-fade-in">
             <TabsList className="w-full grid grid-cols-4">
               <TabsTrigger value="plan" className="flex items-center gap-2">

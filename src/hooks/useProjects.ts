@@ -7,6 +7,7 @@ export interface Project {
   name: string;
   url: string | null;
   niche: string | null;
+  user_id: string;
   created_at: string;
 }
 
