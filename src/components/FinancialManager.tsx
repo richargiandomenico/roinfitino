@@ -31,8 +31,7 @@ function roiColor(v: number) { return v >= 50 ? 'text-profit' : v >= 0 ? 'text-w
 function roiBg(v: number) { return v >= 50 ? 'bg-profit/10 border-profit/30' : v >= 0 ? 'bg-warning/10 border-warning/30' : 'bg-loss/10 border-loss/30'; }
 
 export function FinancialManager({ projectId, projectName }: Props) {
-  const { settings } = useSettings();
-  const { rate: dollarRate, euroRate } = useDollarRate();
+  const { settings, effectiveDollar, effectiveEuro } = useSettings();
   const { records, loading, addRecord, deleteRecord, getMonthlySummaries } = useFinancialRecords(projectId);
 
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
