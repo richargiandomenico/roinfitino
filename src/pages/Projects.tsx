@@ -1,6 +1,7 @@
 import { useAuth } from '@/hooks/useAuth';
 import { useSettings } from '@/hooks/useSettings';
 import { useProjects } from '@/hooks/useProjects';
+import { useCurrentMember } from '@/hooks/useCurrentMember';
 import { useSimulations } from '@/hooks/useSimulations';
 import { useFunnelRecords } from '@/hooks/useFunnelRecords';
 import { AuthPage } from '@/components/AuthPage';
